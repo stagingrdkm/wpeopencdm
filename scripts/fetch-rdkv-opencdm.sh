@@ -54,7 +54,6 @@ while getopts "D:hb:m:d:p" arg; do
 done
 
 echo "Using branch=${BRANCH} machine=${MANIFEST} directory=${DIR} patch=${PATCH} downloads=${DOWNLOADS}"
-
 mkdir -p ${DIR}
 
 pushd ${DIR}
@@ -81,34 +80,36 @@ pushd ${DIR}
 	RDEPENDS_${PN}_remove = "libprovision"
 	PACKAGECONFIG[provisioning] = "-DPLAYREADY_USE_PROVISION=OFF,-DPLAYREADY_USE_PROVISION=OFF,,"
 EOF
+    # Override port configs for Controller UI and Webserver
+      cat <<- 'EOF' >> meta-cmf-raspberrypi/recipes-wpe/wpeframework/wpeframework-plugins_git.bbappend
+	WPEFRAMEWORK_PLUGIN_WEBSERVER_PORT = "8008"
+	WEBKITBROWSER_STARTURL = "http://localhost:8008/index.html"
 
-      cat <<- 'EOF' >> meta-cmf-raspberrypi/conf/include/rdk-bbmasks-rdkv-platform.inc
-	
-	# Changes required to enable Opencdm support in WPE
-	BBMASK .= "|meta-wpe/recipes-graphics/userland/"
-	BBMASK .= "|meta-wpe/recipes-graphics/westeros/"
-	BBMASK .= "|meta-wpe/recipes-graphics/cairo/"
-	BBMASK .= "|meta-wpe/recipes-multimedia/"
-	BBMASK .= "|meta-wpe/recipes-bsp/"
-	BBMASK .= "|meta-metrological/recipes-wpe/"
 EOF
+      cat <<- 'EOF' > meta-cmf-raspberrypi/recipes-wpe/wpeframework/wpeframework_git.bbappend
+	WPEFRAMEWORK_CONFIG_PORT = "8800"
+	DISPLAY_NAME = "WPE"
+	EXTRA_OECMAKE_append = " \
+	 -DWPEFRAMEWORK_PORT=${WPEFRAMEWORK_CONFIG_PORT} \
+	"
 
-      cat <<- 'EOF' >> meta-cmf-raspberrypi/conf/machine/raspberrypi-rdk-mc-wpe-ocdm.conf
-	require conf/machine/raspberrypi3.conf
-	
-	MACHINEOVERRIDES .= ":raspberrypi3:rpi:client:wpewesteros"
-	
-	# required for image creation
-	
-	MACHINE_IMAGE_NAME = "rdk-generic-mediaclient-wpe-opencdm-image"
-	
-	PREFERRED_PROVIDER_virtual/devicesettings-hal = "devicesettings-hal-emulator"
-	
-	PREFERRED_PROVIDER_virtual/gst-plugins-playersinkbin = "gst-plugins-playersinkbin-rpi"
-	
-	DISTRO_FEATURES_append = " opencdm"
+	do_install_append() {
+	    if ${@bb.utils.contains("DISTRO_FEATURES", "systemd", "true", "false", d)}
+	    then
+	        sed -i 's/WAYLAND_DISPLAY=wayland-0/WAYLAND_DISPLAY=${DISPLAY_NAME}/g'  ${D}${systemd_unitdir}/system/wpeframework.service
+	    fi
+	}
 EOF
+      cat <<- 'EOF' >> meta-cmf-raspberrypi/recipes-core/images/rdk-generic-mediaclient-wpe-opencdm-image.bb
+	ROOTFS_POSTPROCESS_COMMAND += "disable_systemd_services; "
 
+	disable_systemd_services() {
+	        if [ -d ${IMAGE_ROOTFS}${sysconfdir}/systemd/system/multi-user.target.wants/ ]; then
+	                rm -f ${IMAGE_ROOTFS}${sysconfdir}/systemd/system/multi-user.target.wants/appmanager.service;
+
+	        fi
+	}
+EOF
     fi
 
 popd
@@ -121,26 +122,18 @@ ln -sf ${DOWNLOADS} downloads
 
 cat << 'EOF' > _build.sh
 #!/bin/bash
-
 # execute it to run a build:
 #   ./_bash.sh
 # or source it
 #   . ./_bash.sh
-
 pushd $(cd `dirname $0` && pwd)
-
-export MACHINE="raspberrypi-rdk-mc-westeros"
-
+export MACHINE="raspberrypi-rdk-mc-wpe-opencdm"
 # if there is sstate-cache directory - let's link to it
 if [ -d ../sstate-cache ]; then
     ln -sf ../sstate-cache
 fi
-
 source meta-cmf-raspberrypi/setup-environment
-
 echo >>conf/auto.conf 'PACKAGE_CLASSES = "package_rpm"'
-echo >>conf/auto.conf 'DISTRO_FEATURES_append = " opencdm"'
-
 [ "$0" = "$BASH_SOURCE" ] && time bitbake rdk-generic-mediaclient-wpe-opencdm-image || echo 'run: bitbake rdk-generic-mediaclient-wpe-opencdm-image # or any other command'
 EOF
 
