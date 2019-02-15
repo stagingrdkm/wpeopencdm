@@ -18,8 +18,9 @@
 # Using WPE:
 # 1) To instruct WPE to show some URL page, please access the following URL from the PC:
 #    http://<ip-address-of-your-raspberry-pi>:8800/Service/Controller/UI
-# 2) Go to 'WebKitBrowser' list entry and set in the 'Custom URL' the following URL:
+# 2) Go to 'WebKitBrowser' list entry and set in the 'Custom URL' one of the following URLs:
 #    https://yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2017.html?tests=6,7&command=run&test_type=encryptedmedia-test
+#    http://www.gurdal-lab.net/dash.js.2.6.7/samples/playreadyMS.html
 # 3) press 'SET' button
 #
 
