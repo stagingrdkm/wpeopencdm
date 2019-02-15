@@ -66,6 +66,9 @@ pushd ${DIR}
     fi
 
     if [ $PATCH == 1 ]; then
+      # https://github.com/WebPlatformForEmbedded/meta-wpe/commit/279046aaac264d5125fc008b966016a8384c6c03
+      (cd meta-wpe; git checkout 279046aaac264d5125fc008b966016a8384c6c03)
+
       (cd meta-cmf-raspberrypi; git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi refs/changes/01/21401/1 && git cherry-pick FETCH_HEAD)
       (cd meta-cmf-raspberrypi; git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi refs/changes/97/21397/1 && git cherry-pick FETCH_HEAD)
       (cd meta-cmf-raspberrypi; git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi refs/changes/96/21396/1 && git cherry-pick FETCH_HEAD)
