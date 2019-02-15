@@ -15,6 +15,13 @@
 # Build the image for raspberry-pi using one-liner command:
 #  $ ./fetch-rdkv-opencdm.sh -d opencdm-builddir && ./opencdm-builddir/_build.sh
 #
+# Using WPE:
+# 1) To instruct WPE to show some URL page, please access the following URL from the PC:
+#    http://<ip-address-of-your-raspberry-pi>:8800/Service/Controller/UI
+# 2) Go to 'WebKitBrowser' list entry and set in the 'Custom URL' the following URL:
+#    https://yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2017.html?tests=6,7&command=run&test_type=encryptedmedia-test
+# 3) press 'SET' button
+#
 
 BRANCH=morty
 DIR=${BRANCH}
