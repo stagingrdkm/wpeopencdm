@@ -54,10 +54,9 @@ cat << 'EOF' > _build.sh
 #   ./_bash.sh
 # or source it
 #   . ./_bash.sh
-pushd $(cd `dirname $0` && pwd)
 export MACHINE="raspberrypirdkhybrefapp"
 source meta-cmf-raspberrypi/setup-environment
-[ "$0" = "$BASH_SOURCE" ] && time bitbake rdk-generic-hybrid-refapp-image || echo 'run: bitbake rdk-generic-mediaclient-wpe-opencdm-image # or any other command'
+[ "$0" = "$BASH_SOURCE" ] && time bitbake rdk-generic-hybrid-refapp-image || echo 'run: bitbake rdk-generic-hybrid-refapp-image # or any other command'
 EOF
 
 chmod u+x _build.sh
