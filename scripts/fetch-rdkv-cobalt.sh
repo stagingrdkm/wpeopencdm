@@ -61,8 +61,6 @@ pushd ${DIR}
     repo sync -j16 --no-clone-bundle --no-tags
 
     (cd meta-raspberrypi; git clone https://github.com/stagingrdkm/meta-stagingrdkm.git recipes-extended)
-    # Remove lg recipes from meta-reaspberrypi as it depends on LGI specific classes
-    rm -rf meta-raspberrypi/recipes-extended/lg
 
     # Temporary cherry-picks (not merged upstream) to build the image
     if [ $PATCH == 1 ]; then
