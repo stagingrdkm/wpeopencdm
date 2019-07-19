@@ -64,6 +64,8 @@ pushd ${DIR}
 
     # Temporary cherry-picks (not merged upstream) to build the image
     if [ $PATCH == 1 ]; then
+        # Add "YouTube TV (cobalt)" to the menu list
+        (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/27334/1 && git cherry-pick FETCH_HEAD)
         # Correct protobuf checksum
         (cd meta-virtualization; git fetch "https://code.rdkcentral.com/r/rdk/components/opensource/oe/meta-virtualization" refs/changes/51/27251/1 && git cherry-pick FETCH_HEAD)
         # RDKCMF-8562 Fix for 'no package provides libout123.so.0
