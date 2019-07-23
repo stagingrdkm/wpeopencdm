@@ -65,17 +65,12 @@ pushd ${DIR}
     # Temporary cherry-picks (not merged upstream) to build the image
     if [ $PATCH == 1 ]; then
         # Add "YouTube TV (cobalt)" to the menu list
-        (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/27334/1 && git cherry-pick FETCH_HEAD)
+        (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/27334/2 && git cherry-pick FETCH_HEAD)
         # Correct protobuf checksum
         (cd meta-virtualization; git fetch "https://code.rdkcentral.com/r/rdk/components/opensource/oe/meta-virtualization" refs/changes/51/27251/1 && git cherry-pick FETCH_HEAD)
         # RDKCMF-8562 Fix for 'no package provides libout123.so.0
         (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/00/26800/1 && git cherry-pick FETCH_HEAD)
     fi
-
-    cat <<- 'EOF' >> meta-cmf-raspberrypi/recipes-core/images/rdk-generic-hybrid-refapp-image.bbappend
-IMAGE_INSTALL_append += " cobalt"
-EOF
-
 popd
 
 
