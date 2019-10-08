@@ -85,6 +85,7 @@ fi
 source meta-cmf-raspberrypi/setup-environment
 
 echo >>conf/auto.conf 'PACKAGE_CLASSES = "package_rpm"'
+echo >>conf/auto.conf 'INCOMPATIBLE_LICENSE_pn-gdb = ""'
 echo >>conf/auto.conf 'PACKAGECONFIG_remove_pn-gdb = "readline"'
 echo >>conf/auto.conf 'IMAGE_INSTALL_append = " gdb strace tcpdump nfs-utils"'
 
