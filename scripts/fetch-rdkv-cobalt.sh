@@ -59,14 +59,6 @@ mkdir -p ${DIR}
 pushd ${DIR}
     repo init -u https://code.rdkcentral.com/r/manifests -b ${BRANCH} -m ${MANIFEST}.xml
     repo sync -j16 --no-clone-bundle --no-tags
-
-    (cd meta-raspberrypi; git clone https://github.com/stagingrdkm/meta-stagingrdkm.git recipes-extended)
-
-    # Temporary cherry-picks (not merged upstream) to build the image
-    if [ $PATCH == 1 ]; then
-        # Add "YouTube TV (cobalt)" to the menu list
-        (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/27334/2 && git cherry-pick FETCH_HEAD)
-    fi
 popd
 
 
