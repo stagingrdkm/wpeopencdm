@@ -1,0 +1,60 @@
+ARRISEOS-25647: Handle duplicated samples and disallow big gaps.
+
+Pawel Stanek <pawel.stanek@redembedded.com>
+
+diff --git a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+index f23f0e6c8f7..bb151deff26 100644
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+@@ -1742,6 +1742,38 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(MediaSample& sample)
+             } while(false);
+         }
+ 
++
++        // Big Buck Bunny 60FPS UHP issue: When seeking to a position for which samples are buffered
++        // the browser goes on and executes the seek i.e. pushes samples to the decoder, seeks and resumes playback.
++        // However sometimes it happens - and it looke like it's YT issue - that YT, at the same time, pumps same samples
++        // (same regarding PTSes) with different resolution/duration. These samples are processed while
++        // the decoder already plays some of the previously fed data and pushed to the decoder.
++        // This causes the decoder at some point to encounter PTSes from the past and make it to freak out. Once again:
++        // for me this looks like YT's issue becuase IMO it shouldn't push any data since .buffered() says the data is
++        // already there. It might be YT expects the decoder to handle that gracefully. All in all such samples are
++        // replaces old one (it's safer to take newly fed one).
++        if (!m_source->mediaElement()->seeking() &&
++            !m_source->mediaElement()->paused() &&
++            m_source->mediaElement()->isPlaying()) {
++            auto foundInSamples = trackBuffer.samples.presentationOrder().findSampleWithPresentationTime(presentationTimestamp);
++            if (foundInSamples != trackBuffer.samples.presentationOrder().end()) {
++                WTFLogAlways("Replacing sample for %s because detected repeated frame (PTS:%f, old size: %fx%f, new size: %fx%f,"
++                             " old dur: %f, new dur:%f, old DTS:%f, new DTS:%f)\n",
++                             sample.trackID().string().utf8().data(),
++                             presentationTimestamp.toDouble(),
++                            foundInSamples->second->presentationSize().width(),
++                            foundInSamples->second->presentationSize().height(),
++                            sample.presentationSize().width(),
++                            sample.presentationSize().height(),
++                            foundInSamples->second->duration().toDouble(),
++                            sample.duration().toDouble(),
++                            foundInSamples->second->decodeTime().toDouble(),
++                            sample.decodeTime().toDouble());
++
++                 erasedSamples.addSample(*(foundInSamples->second));
++            }
++        }
++
+         // 1.16 Remove decoding dependencies of the coded frames removed in the previous step:
+         DecodeOrderSampleMap::MapType dependentSamples;
+         if (!erasedSamples.empty()) {
+@@ -2006,10 +2038,10 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, const AtomicString
+         // but don't notice for 350s of playback time, and the client can enqueue data for the
+         // new current time without triggering this early return.
+         // FIXME(135867): Make this gap detection logic less arbitrary.
+-        MediaTime oneSecond(1, 1);
++        MediaTime threshold(200, 1000);  // 200ms
+         if (
+             trackBuffer.lastEnqueuedPresentationTime.isValid()
+-            && sample->presentationTime() - trackBuffer.lastEnqueuedPresentationTime > oneSecond)
++            && sample->presentationTime() - trackBuffer.lastEnqueuedPresentationTime > threshold)
+             break;
+ 
+         trackBuffer.decodeQueue.erase(trackBuffer.decodeQueue.begin());

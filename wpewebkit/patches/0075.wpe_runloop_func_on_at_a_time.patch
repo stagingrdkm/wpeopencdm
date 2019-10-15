@@ -1,0 +1,49 @@
+diff --git a/Source/WTF/wtf/RunLoop.cpp b/Source/WTF/wtf/RunLoop.cpp
+index 66593b04e4c..e810f067d95 100644
+--- a/Source/WTF/wtf/RunLoop.cpp
++++ b/Source/WTF/wtf/RunLoop.cpp
+@@ -30,6 +30,8 @@
+ #include <wtf/StdLibExtras.h>
+ #include <wtf/ThreadSpecific.h>
+ 
++#include <glib.h>
++
+ namespace WTF {
+ 
+ static RunLoop* s_mainRunLoop;
+@@ -91,7 +93,7 @@ void RunLoop::performWork()
+     // we guarantee to occasionally return from the run loop so other event sources will be allowed to spin.
+ 
+     size_t functionsToHandle = 0;
+-    {
++//    {
+         Function<void ()> function;
+         {
+             MutexLocker locker(m_functionQueueLock);
+@@ -104,8 +106,12 @@ void RunLoop::performWork()
+         }
+ 
+         function();
+-    }
+-
++        {
++            MutexLocker locker(m_functionQueueLock);
++            if(!m_functionQueue.isEmpty()) g_source_set_ready_time(m_source.get(), 5);
++        }
++    //}
++#if 0
+     for (size_t functionsHandled = 1; functionsHandled < functionsToHandle; ++functionsHandled) {
+         Function<void ()> function;
+         {
+@@ -119,9 +125,10 @@ void RunLoop::performWork()
+ 
+             function = m_functionQueue.takeFirst();
+         }
+-        
++
+         function();
+     }
++#endif
+ }
+ 
+ void RunLoop::dispatch(Function<void ()>&& function)

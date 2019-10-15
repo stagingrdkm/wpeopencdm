@@ -1,0 +1,263 @@
+[OMWHI-2119] [SAMSELENE-2252] Call EOS when no data in buffers
+
+Jacek Skiba <jacek.skiba@redembedded.com>
+
+diff --git a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+index 656bed93..de77f730 100644
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+@@ -707,6 +707,15 @@ void SourceBuffer::sourceBufferPrivateAppendComplete(AppendResult result)
+         toString(m_buffered->ranges()).utf8().data());
+ }
+ 
++bool SourceBuffer::areAllSamplesPushedToAppsrc() const
++{
++    for (auto& trackBuffer : m_trackBufferMap.values()) {
++        if (!trackBuffer.decodeQueue.empty())
++            return false;
++    }
++    return true;
++}
++
+ void SourceBuffer::sourceBufferPrivateDidReceiveRenderingError(int error)
+ {
+ #if LOG_DISABLED
+@@ -2296,6 +2305,13 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, const AtomicString
+ #endif
+     }
+ 
++    // OMWHI-2119: we notify that buffer is empty to prevent this situation:
++    // * we call from JS MediaSource::endOfStream()
++    // * we propagate EOS to appsrc
++    // * but we still have video data in source buffer
++    if (hasVideo())
++        m_private->notifyNoSamples();
++
+     LOG(
+         MediaSource,
+         "%p "
+diff --git a/Source/WebCore/Modules/mediasource/SourceBuffer.h b/Source/WebCore/Modules/mediasource/SourceBuffer.h
+index 8da4cd1c..b43f37d3 100644
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.h
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.h
+@@ -136,6 +136,7 @@ private:
+     MediaTime sourceBufferPrivateFastSeekTimeForMediaTime(const MediaTime&, const MediaTime& negativeThreshold, const MediaTime& positiveThreshold) final;
+     void sourceBufferPrivateAppendComplete(AppendResult) final;
+     void sourceBufferPrivateDidReceiveRenderingError(int errorCode) final;
++    bool areAllSamplesPushedToAppsrc() const override;
+ 
+     void audioTrackEnabledChanged(AudioTrack&) final;
+     void videoTrackSelectedChanged(VideoTrack&) final;
+diff --git a/Source/WebCore/platform/graphics/SourceBufferPrivate.h b/Source/WebCore/platform/graphics/SourceBufferPrivate.h
+index 7ac5dd27..c8818526 100644
+--- a/Source/WebCore/platform/graphics/SourceBufferPrivate.h
++++ b/Source/WebCore/platform/graphics/SourceBufferPrivate.h
+@@ -60,6 +60,7 @@ public:
+     virtual void setActive(bool) { }
+     virtual void stopAskingForMoreSamples(const AtomicString&) { }
+     virtual void notifyClientWhenReadyForMoreSamples(const AtomicString&) { }
++    virtual void notifyNoSamples() const { };
+ 
+     virtual Vector<String> enqueuedSamplesForTrackID(const AtomicString&) { return { }; }
+ };
+diff --git a/Source/WebCore/platform/graphics/SourceBufferPrivateClient.h b/Source/WebCore/platform/graphics/SourceBufferPrivateClient.h
+index 04dfeb3e..1d059526 100644
+--- a/Source/WebCore/platform/graphics/SourceBufferPrivateClient.h
++++ b/Source/WebCore/platform/graphics/SourceBufferPrivateClient.h
+@@ -83,6 +83,7 @@ public:
+     virtual void sourceBufferPrivateDidReceiveRenderingError(int errorCode) = 0;
+ 
+     virtual double timestampOffset() const = 0;
++    virtual bool areAllSamplesPushedToAppsrc() const = 0;
+ };
+ 
+ }
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
+index acaab814..facd987f 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
+@@ -614,6 +614,8 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
+                 m_eosPending = true;
+                 ASSERT(m_playbackPipeline);
+                 m_playbackPipeline->markEndOfStream(MediaSourcePrivate::EosNoError);
++                if (m_playbackPipeline->areSourceBuffersEmpty())
++                    m_playbackPipeline->sendEosToAppsrc();
+             }
+ 
+             break;
+@@ -928,6 +930,13 @@ void MediaPlayerPrivateGStreamerMSE::markEndOfStream(MediaSourcePrivate::EndOfSt
+     updateStates();
+ }
+ 
++void MediaPlayerPrivateGStreamerMSE::sendEosWhenNoSamples()
++{
++    if (m_eosMarked && m_playbackPipeline->areSourceBuffersEmpty()) {
++        m_playbackPipeline->sendEosToAppsrc();
++    }
++}
++
+ MediaTime MediaPlayerPrivateGStreamerMSE::currentMediaTime() const
+ {
+     MediaTime position = MediaPlayerPrivateGStreamer::currentMediaTime();
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
+index 674e578d..7a2ffcc1 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
+@@ -79,6 +79,7 @@ public:
+     MediaSourcePrivateClient* mediaSourcePrivateClient() { return m_mediaSource.get(); }
+ 
+     void markEndOfStream(MediaSourcePrivate::EndOfStreamStatus);
++    void sendEosWhenNoSamples();
+ 
+ #if ENABLE(LEGACY_ENCRYPTED_MEDIA_V1) || ENABLE(LEGACY_ENCRYPTED_MEDIA)
+     void dispatchDecryptionKey(GstBuffer*) override;
+@@ -96,6 +97,7 @@ public:
+ 
+     static bool supportsCodecs(const String& codecs);
+ 
++
+ private:
+     static void getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>&);
+     static MediaPlayer::SupportsType supportsType(const MediaEngineSupportParameters&);
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.cpp b/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.cpp
+index 29e46a14..9e881265 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.cpp
+@@ -193,6 +193,13 @@ void MediaSourceClientGStreamerMSE::enqueueSample(Ref<MediaSample>&& sample)
+         m_playerPrivate->m_playbackPipeline->enqueueSample(WTFMove(sample));
+ }
+ 
++void MediaSourceClientGStreamerMSE::notifyNoSamples() const
++{
++    if (m_playerPrivate) {
++        m_playerPrivate->sendEosWhenNoSamples();
++    }
++}
++
+ GRefPtr<WebKitMediaSrc> MediaSourceClientGStreamerMSE::webKitMediaSrc()
+ {
+     ASSERT(WTF::isMainThread());
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.h b/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.h
+index da798cfb..12b1e44b 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.h
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaSourceClientGStreamerMSE.h
+@@ -52,6 +52,7 @@ public:
+     void removedFromMediaSource(RefPtr<SourceBufferPrivateGStreamer>);
+     void flush(AtomicString);
+     void enqueueSample(Ref<MediaSample>&&);
++    void notifyNoSamples() const;
+ 
+     void clearPlayerPrivate();
+ 
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.cpp b/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.cpp
+index c380483f..babcfad7 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.cpp
+@@ -382,6 +382,19 @@ void PlaybackPipeline::notifyDurationChanged()
+     // WebKitMediaSrc will ask MediaPlayerPrivateGStreamerMSE for the new duration later, when somebody asks for it.
+ }
+ 
++bool PlaybackPipeline::areSourceBuffersEmpty()
++{
++    ASSERT(WTF::isMainThread());
++
++    WebKitMediaSrcPrivate* priv = m_webKitMediaSrc->priv;
++    for (Stream* stream : priv->streams) {
++        if (!stream->sourceBuffer->areAllSamplesPushedToAppsrc()) {
++            return false;
++        }
++    }
++    return true;
++}
++
+ void PlaybackPipeline::markEndOfStream(MediaSourcePrivate::EndOfStreamStatus)
+ {
+     WebKitMediaSrcPrivate* priv = m_webKitMediaSrc->priv;
+@@ -399,17 +412,20 @@ void PlaybackPipeline::markEndOfStream(MediaSourcePrivate::EndOfStreamStatus)
+         webKitMediaSrcDoAsyncDone(m_webKitMediaSrc.get());
+     }
+ 
+-    Vector<GstAppSrc*> appsrcs;
+-
+     GST_OBJECT_LOCK(m_webKitMediaSrc.get());
++    m_appsrc.clear();
+     for (Stream* stream : priv->streams) {
+         if (stream->appsrc)
+-            appsrcs.append(GST_APP_SRC(stream->appsrc));
++            m_appsrc.append(GST_APP_SRC(stream->appsrc));
+     }
+     GST_OBJECT_UNLOCK(m_webKitMediaSrc.get());
++}
+ 
+-    for (GstAppSrc* appsrc : appsrcs)
++void PlaybackPipeline::sendEosToAppsrc()
++{
++    for (GstAppSrc* appsrc : m_appsrc) {
+         gst_app_src_end_of_stream(appsrc);
++    }
+ }
+ 
+ GstPadProbeReturn segmentFixerProbe(GstPad*, GstPadProbeInfo* info, gpointer)
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.h b/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.h
+index da498d9f..fc4bd7e5 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.h
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/PlaybackPipeline.h
+@@ -60,9 +60,11 @@ public:
+     void attachTrack(RefPtr<SourceBufferPrivateGStreamer>, RefPtr<TrackPrivateBase>, GstStructure*, GstCaps*);
+     void reattachTrack(RefPtr<SourceBufferPrivateGStreamer>, RefPtr<TrackPrivateBase>);
+     void notifyDurationChanged();
++    bool areSourceBuffersEmpty();
+ 
+     // From MediaSourceGStreamer.
+     void markEndOfStream(MediaSourcePrivate::EndOfStreamStatus);
++    void sendEosToAppsrc();
+ 
+     // From SourceBufferPrivateGStreamer.
+     void flush(AtomicString);
+@@ -72,6 +74,7 @@ public:
+ private:
+     PlaybackPipeline() = default;
+     GRefPtr<WebKitMediaSrc> m_webKitMediaSrc;
++    Vector<GstAppSrc*> m_appsrc;
+ };
+ 
+ } // namespace WebCore.
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.cpp
+index cf352c10..dfe8706d 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.cpp
+@@ -174,5 +174,13 @@ void SourceBufferPrivateGStreamer::didReceiveAllPendingSamples()
+         m_sourceBufferPrivateClient->sourceBufferPrivateAppendComplete(SourceBufferPrivateClient::AppendSucceeded);
+ }
+ 
++bool SourceBufferPrivateGStreamer::areAllSamplesPushedToAppsrc() const {
++    return m_sourceBufferPrivateClient->areAllSamplesPushedToAppsrc();
++}
++
++void SourceBufferPrivateGStreamer::notifyNoSamples() const {
++    m_client->notifyNoSamples();
++}
++
+ }
+ #endif
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.h b/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.h
+index d4b67e2e..1971ca95 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.h
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.h
+@@ -68,6 +68,7 @@ public:
+     void setActive(bool) final;
+     void stopAskingForMoreSamples(const AtomicString&) final;
+     void notifyClientWhenReadyForMoreSamples(const AtomicString&) final;
++    void notifyNoSamples() const override;
+ 
+     void setReadyForMoreSamples(bool);
+     void notifyReadyForMoreSamples();
+@@ -77,6 +78,8 @@ public:
+     void didReceiveAllPendingSamples();
+     AtomicString trackId() const {return m_trackId;}
+ 
++    bool areAllSamplesPushedToAppsrc() const;
++
+ private:
+     SourceBufferPrivateGStreamer(MediaSourceGStreamer*, Ref<MediaSourceClientGStreamerMSE>, const ContentType&);
+     friend class MediaSourceClientGStreamerMSE;

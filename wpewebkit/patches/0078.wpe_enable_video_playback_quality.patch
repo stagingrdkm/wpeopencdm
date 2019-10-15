@@ -1,0 +1,99 @@
+SAMSELENE-2174: Enable video playback quality interface
+
+Jacek Skiba <jacek.skiba@redembedded.com>
+
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index a12fa39cf3a..7315cfced86 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -1441,7 +1441,9 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
+     case GST_MESSAGE_APPLICATION:
+     {
+         static const std::string xposName{"x-position"};
+-        if(structure && xposName == gst_structure_get_name(structure))
++        static const std::string frameRate{"frame-rate"};
++
++        if (structure && xposName == gst_structure_get_name(structure))
+         {
+             gint64 xpos = -1;
+             auto status = gst_structure_get_int64(structure, "value", &xpos);
+@@ -1458,6 +1460,12 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
+             }
+ #endif
+         }
++        else if (structure && frameRate == gst_structure_get_name(structure))
++        {
++            gst_structure_get_uint(structure, "rendered_frames", &m_rendered_frames);
++            gst_structure_get_uint(structure, "dropped_frames", &m_dropped_frames);
++            GST_DEBUG("frame-rate message: rendered_frames: %u, dropped_frames: %u", m_rendered_frames, m_dropped_frames);
++        }
+         break;
+     }
+     default:
+@@ -2317,6 +2325,23 @@ const HashSet<String, ASCIICaseInsensitiveHash>& MediaPlayerPrivateGStreamer::mi
+     return mimeTypes;
+ }
+ 
++#if ENABLE(MEDIA_SOURCE)
++unsigned long MediaPlayerPrivateGStreamer::totalVideoFrames()
++{
++    return m_rendered_frames;
++}
++
++unsigned long MediaPlayerPrivateGStreamer::droppedVideoFrames()
++{
++    return m_dropped_frames;
++}
++
++unsigned long MediaPlayerPrivateGStreamer::corruptedVideoFrames()
++{
++    return 0;
++}
++#endif
++
+ void MediaPlayerPrivateGStreamer::getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>& types)
+ {
+     types = mimeTypeSet();
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
+index 2557e89b250..b0819803feb 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
+@@ -136,6 +136,12 @@ public:
+     bool isLiveStream() const override { return m_isStreaming; }
+     bool isStreamStarted() const { return m_startStreamSeen; }
+ 
++#if ENABLE(MEDIA_SOURCE)
++    unsigned long totalVideoFrames() override;
++    unsigned long droppedVideoFrames() override;
++    unsigned long corruptedVideoFrames() override;
++#endif
++
+ #if PLATFORM(BCM_NEXUS)
+     GRefPtr<GstElement> m_mpegAudioParse;
+ #endif
+@@ -275,6 +281,8 @@ private:
+     int m_mediaCacheVarState;
+     mutable MediaTime m_lastKnownDuration = {};
+     bool m_startStreamSeen = false;
++    guint m_rendered_frames = 0;
++    guint m_dropped_frames = 0;
+ #if PLATFORM(INTEL_CE)
+     bool m_seekTriggered = false;
+ #endif
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
+index dfc86f86d23..9d60a3a1404 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
+@@ -111,11 +111,6 @@ private:
+     void updatePlaybackRate() override;
+     void asyncStateChangeDone() override;
+ 
+-    // FIXME: Implement.
+-    unsigned long totalVideoFrames() override { return 0; }
+-    unsigned long droppedVideoFrames() override { return 0; }
+-    unsigned long corruptedVideoFrames() override { return 0; }
+-    MediaTime totalFrameDelay() override { return MediaTime::zeroTime(); }
+     bool isTimeBuffered(const MediaTime&) const;
+ 
+     bool isMediaSource() const override { return true; }

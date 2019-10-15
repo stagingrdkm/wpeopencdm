@@ -1,0 +1,24 @@
+(2019.03.25) Jacek Manko (jacek.manko@redembedded.com)
+[ARRISEOS-27224] Limit supported video resolutions
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp
+index 99a22a8fc29..29840561d09 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp
+@@ -2485,6 +2485,16 @@ bool MediaPlayerPrivateGStreamerBase::supportsKeySystem(const String& keySystem,
+ 
+ MediaPlayer::SupportsType MediaPlayerPrivateGStreamerBase::extendedSupportsType(const MediaEngineSupportParameters& parameters, MediaPlayer::SupportsType result)
+ {
++#if PLATFORM(INTEL_CE)
++    const int max_width = 1920;
++    const int max_height = 1080;
++#else
++    const int max_width = 3840;
++    const int max_height = 2160;
++#endif  // PLATFORM(INTEL_CE)
++    if (parameters.dimension.width() > max_width || parameters.dimension.height() > max_height)
++        return MediaPlayer::IsNotSupported;
++
+ #if ENABLE(LEGACY_ENCRYPTED_MEDIA_V1) || ENABLE(LEGACY_ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA)
+     // From: <http://dvcs.w3.org/hg/html-media/raw-file/eme-v0.1b/encrypted-media/encrypted-media.html#dom-canplaytype>
+     // In addition to the steps in the current specification, this method must run the following steps:

@@ -1,0 +1,611 @@
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+@@ -119,6 +119,9 @@ const MediaTime gEnqueueGapDefault =
+         1000
+     };
+ 
++const auto gPerSampleLogging = nullptr != ::getenv("MSE_SRCBUF_PER_SAMPLE_LOGGING");
++
++
+ struct SourceBuffer::TrackBuffer {
+     MediaTime lastDecodeTimestamp;
+     MediaTime lastFrameDuration;
+@@ -422,6 +425,12 @@ void SourceBuffer::rangeRemoval(const MediaTime& start, const MediaTime& end)
+     // 4. Queue a task to fire a simple event named updatestart at this SourceBuffer object.
+     scheduleEvent(eventNames().updatestartEvent);
+ 
++    LOG(
++        MediaSource,
++        "%p <%fs %fs)", this,
++        start.toDouble(),
++        end.toDouble());
++
+     // 5. Return control to the caller and run the rest of the steps asynchronously.
+     m_pendingRemoveStart = start;
+     m_pendingRemoveEnd = end;
+@@ -472,6 +481,20 @@ MediaTime SourceBuffer::highestPresentationTimestamp() const
+     return highestTime;
+ }
+ 
++MediaTime SourceBuffer::lowestPresentationTimestamp() const
++{
++    MediaTime lowestPTS = MediaTime::invalidTime();
++
++    for (auto& trackBuffer : m_trackBufferMap.values()) {
++
++        auto i = trackBuffer.samples.presentationOrder().begin();
++        if (i == trackBuffer.samples.presentationOrder().end())
++            continue;
++        lowestPTS = lowestPTS.isValid() ? std::min(lowestPTS, i->first) : i->first;
++    }
++    return lowestPTS;
++}
++
+ void SourceBuffer::readyStateChanged()
+ {
+     updateBufferedFromTrackBuffers();
+@@ -495,8 +518,6 @@ void SourceBuffer::removedFromMediaSource()
+ 
+ void SourceBuffer::seekToTime(const MediaTime& time)
+ {
+-    LOG(MediaSource, "SourceBuffer::seekToTime(%p) - time(%s)", this, toString(time).utf8().data());
+-
+     for (auto& trackBufferPair : m_trackBufferMap) {
+         TrackBuffer& trackBuffer = trackBufferPair.value;
+         const AtomicString& trackID = trackBufferPair.key;
+@@ -725,7 +746,7 @@ void SourceBuffer::sourceBufferPrivateAppendComplete(AppendResult result)
+         trackID = trackBufferPair.key;
+ 
+         if (trackBuffer.needsReenqueueing) {
+-            LOG(MediaSource, "SourceBuffer::sourceBufferPrivateAppendComplete(%p) - reenqueuing at time (%s)", this, toString(currentMediaTime).utf8().data());
++            LOG(MediaSource, "SourceBuffer::sourceBufferPrivateAppendComplete(%p) - reenqueuing at %fs", this, currentMediaTime.toDouble());
+             reenqueueMediaForTime(trackBuffer, trackID, currentMediaTime);
+         } else
+             provideMediaData(trackBuffer, trackID);
+@@ -800,13 +821,14 @@ static PlatformTimeRanges removeSamplesFromTrackBuffer(const DecodeOrderSampleMa
+ 
+         RefPtr<MediaSample>& sample = sampleIt.second;
+ 
+-        LOG(
+-            MediaSource, "%p %s PTS %fs DTS %fs DUR %fs",
+-            buffer,
+-            sampleIt.second->trackID().string().utf8().data(),
+-            sampleIt.second->presentationTime().toDouble(),
+-            sampleIt.second->decodeTime().toDouble(),
+-            sampleIt.second->duration().toDouble());
++        if(gPerSampleLogging)
++            LOG(
++                MediaSource, "%p %s PTS %fs DTS %fs DUR %fs",
++                buffer,
++                sampleIt.second->trackID().string().utf8().data(),
++                sampleIt.second->presentationTime().toDouble(),
++                sampleIt.second->decodeTime().toDouble(),
++                sampleIt.second->duration().toDouble());
+ 
+         // Remove the erased samples from the TrackBuffer sample map.
+         trackBuffer.samples.removeSample(sample.get());
+@@ -884,10 +906,10 @@ void SourceBuffer::removeCodedFrames(const MediaTime& start, const MediaTime& en
+ 
+     LOG(
+         MediaSource,
+-        "SourceBuffer::removeCodedFrames(%p) currTime %s requested range [%s, %s)",
++        "SourceBuffer::removeCodedFrames(%p) currTime %fs range [%fs, %fs)",
+         this,
+-        toString(currentMediaTime).utf8().data(),
+-        toString(start).utf8().data(), toString(end).utf8().data());
++        currentMediaTime.toDouble(),
++        start.toDouble(), end.toDouble());
+ 
+     // 2. Let end be the end presentation timestamp for the removal range.
+     // 3. For each track buffer in this source buffer, run the following steps:
+@@ -954,14 +976,14 @@ void SourceBuffer::removeCodedFrames(const MediaTime& start, const MediaTime& en
+         LOG(
+             MediaSource,
+             "SourceBuffer::removeCodedFrames(%p)"
+-            " removing range [%s, %s)",
++            " removing range [%fs, %fs)",
+             this,
+             decodeOrder.end() != removeDecodeStart
+-            ? toString(removeDecodeStart->second->presentationTime()).utf8().data()
+-            : "undefined",
++            ? removeDecodeStart->second->presentationTime().toDouble()
++            : NAN,
+             decodeOrder.end() != removeDecodeEnd
+-            ? toString(removeDecodeEnd->second->presentationTime()).utf8().data()
+-            : "undefined");
++            ? removeDecodeEnd->second->presentationTime().toDouble()
++            : NAN);
+ 
+         PlatformTimeRanges erasedRanges =
+             removeSamplesFromTrackBuffer(
+@@ -1015,6 +1037,12 @@ void SourceBuffer::removeTimerFired()
+     ASSERT(m_pendingRemoveStart.isValid());
+     ASSERT(m_pendingRemoveStart < m_pendingRemoveEnd);
+ 
++    LOG(
++        MediaSource,
++        "%p <%fs %fs)", this,
++        m_pendingRemoveStart.toDouble(),
++        m_pendingRemoveEnd.toDouble());
++
+     // Section 3.5.7 Range Removal
+     // http://w3c.github.io/media-source/#sourcebuffer-range-removal
+ 
+@@ -1070,6 +1098,23 @@ void SourceBuffer::enqueueGapTimerFired()
+ 
+ void SourceBuffer::evictRangeIfPossible(const MediaTime &begin, const MediaTime &end)
+ {
++    if(
++            begin.isInvalid()
++            || begin.isNegativeInfinite()
++            || begin.isPositiveInfinite()
++            || end.isInvalid()
++            || end.isNegativeInfinite()
++            || end.isPositiveInfinite()
++            || begin >= end)
++    {
++        LOG(
++            MediaSource,
++            "%p skip, invalid range <%fs, %fs)",
++            this,
++            begin.toDouble(), end.toDouble());
++        return;
++    }
++
+     const auto currTime = m_source->currentTime();
+ 
+     for(auto &trackBufferPair : m_trackBufferMap)
+@@ -1093,13 +1138,13 @@ void SourceBuffer::evictRangeIfPossible(const MediaTime &begin, const MediaTime
+                 MediaSource,
+                 "SourceBuffer::evictRangeIfPossible(%p)"
+                 " track %s "
+-                " currTime %s"
+-                " in range [%s, %s)"
++                " currTime %fs"
++                " in range [%fs, %fs)"
+                 " buffered %s",
+                 this,
+                 trackID.string().utf8().data(),
+-                toString(currTime).utf8().data(),
+-                toString(begin).utf8().data(), toString(end).utf8().data(),
++                currTime.toDouble(),
++                begin.toDouble(), end.toDouble(),
+                 toString(m_buffered->ranges()).utf8().data());
+             return;
+         }
+@@ -1117,27 +1162,30 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
+         return;
+ 
+     const MediaTime currentTime = m_source->currentTime();
++    const auto currBufSize = extraMemoryCost();
++    const auto maxBufSize = maximumBufferSize();
++
++
++    if(maxBufSize > currBufSize + newDataSize) m_bufferFull = false;
+ 
+     // This algorithm is run to free up space in this source buffer when new data is appended.
+     // 1. Let new data equal the data that is about to be appended to this SourceBuffer.
+     // 2. If the buffer full flag equals false, then abort these steps.
+     if (!m_bufferFull)
+     {
+-        const auto currBufSize = extraMemoryCost();
+-
+         LOG(
+             MediaSource,
+             "SourceBuffer::evictCodedFrames(%p)"
+-            " not needed, currTime %fs buffered %s currBufSize %zuB (%zuMB)",
++            " not needed, currTime %fs buffered %s newDataSize %zub currBufSize %zuB (%zuMB)",
+             this,
+             currentTime.toDouble(),
+             toString(m_buffered->ranges()).utf8().data(),
++            newDataSize,
+             currBufSize,
+             currBufSize / (1024 * 1024));
+         return;
+     }
+ 
+-    const auto maxBufSize = maximumBufferSize();
+ 
+     // 3. Let removal ranges equal a list of presentation time ranges that can be evicted from
+     // the presentation to make room for the new data.
+@@ -1146,23 +1194,31 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
+     // a time, up to 30 seconds before currentTime.
+ 
+     const auto duration = m_source->duration();
+-    const size_t initialBufferedSize = extraMemoryCost();
++    const auto lowestPTS = lowestPresentationTimestamp();
++
+ 
+     LOG(
+         MediaSource,
+         "SourceBuffer::evictCodedFrames(%p)"
+-        " currTime  %s, require %zub, maximum bufSize %zub",
+-        this, toString(currentTime).utf8().data(),
+-        extraMemoryCost() + newDataSize,
+-        maxBufSize);
++        " currTime %fs duration %fs lowestPTS %fs require %zub (curr %zub + new %zub), maximum bufSize %zukB",
++        this,
++        currentTime.toDouble(),
++        duration.toDouble(),
++        lowestPTS.toDouble(),
++        currBufSize + newDataSize,
++        currBufSize,
++        newDataSize,
++        maxBufSize / 1024);
++
++    LOG(MediaSource, "%p LHS", this);
+ 
+     {
++        const auto segmentBegin = lowestPTS;
+         auto delta = MediaTime{60, 1};
+ 
+         while(1 < delta.timeValue())
+         {
+             const auto maximumEnd = currentTime - delta;
+-            const auto segmentBegin = MediaTime::zeroTime();
+             auto segmentEnd = segmentBegin + delta;
+ 
+             while(segmentEnd < maximumEnd)
+@@ -1184,10 +1240,13 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
+         }
+     }
+ 
++    LOG(MediaSource, "%p RHS", this);
++
+     if(
+         m_bufferFull
+         && duration.isValid()
+-        && !duration.isPositiveInfinite())
++        && !duration.isPositiveInfinite()
++        && !duration.isIndefinite())
+     {
+         auto delta = MediaTime{60, 1};
+ 
+@@ -1198,7 +1257,16 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
+             const auto segmentEnd = duration;
+             auto segmentBegin = segmentEnd - delta;
+ 
+-            while (segmentBegin > minimumBegin)
++            if(
++                !segmentBegin.isValid()
++                || segmentBegin.isPositiveInfinite()
++                || segmentBegin.isIndefinite())
++            {
++                LOG(MediaSource, "%p RHS invalid segmentBegin %fs, skip", this, segmentBegin.toDouble());
++                break;
++            }
++
++            while(segmentBegin > minimumBegin)
+             {
+                 // 4. For each range in removal ranges, run the coded frame removal algorithm with start and
+                 // end equal to the removal range start and end timestamp respectively.
+@@ -1222,7 +1290,7 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
+         "SourceBuffer::evictCodedFrames(%p)"
+         " evicted %zub %s buffered %s",
+         this,
+-        initialBufferedSize - extraMemoryCost(),
++        currBufSize - extraMemoryCost(),
+         m_bufferFull ? " but FAILED to free enough" : "",
+         toString(m_buffered->ranges()).utf8().data());
+ }
+@@ -1683,17 +1751,18 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(MediaSample& sample)
+ 
+     TrackBuffer& trackBuffer = it->value;
+ 
+-    LOG(
+-        MediaSource,
+-        "NEWSAMPLE %s %fs HPTS %fs LEPTS %fs PTS %fs DTS %fs DUR %fs %zub",
+-        sample.trackID().string().utf8().data(),
+-        MediaTime{g_get_monotonic_time(), GST_USECOND}.toDouble(),
+-        trackBuffer.highestPresentationTimestamp.toDouble(),
+-        trackBuffer.lastEnqueuedPresentationTime.toDouble(),
+-        sample.presentationTime().toDouble(),
+-        sample.decodeTime().toDouble(),
+-        sample.duration().toDouble(),
+-        sample.sizeInBytes());
++    if(gPerSampleLogging)
++        LOG(
++            MediaSource,
++            "NEWSAMPLE %s %fs HPTS %fs LEPTS %fs PTS %fs DTS %fs DUR %fs %zub",
++            sample.trackID().string().utf8().data(),
++            MediaTime{g_get_monotonic_time(), GST_USECOND}.toDouble(),
++            trackBuffer.highestPresentationTimestamp.toDouble(),
++            trackBuffer.lastEnqueuedPresentationTime.toDouble(),
++            sample.presentationTime().toDouble(),
++            sample.decodeTime().toDouble(),
++            sample.duration().toDouble(),
++            sample.sizeInBytes());
+ 
+     // 3.5.8 Coded Frame Processing
+     // http://www.w3.org/TR/media-source/#sourcebuffer-coded-frame-processing
+@@ -1753,14 +1822,15 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(MediaSample& sample)
+             decodeTimestamp += m_timestampOffset;
+         }
+ 
+-        LOG(MediaSource,
+-            "trackBuffer %s  HPTS %fs LFD %fs LEPTS %fs LEDET %fs LDT %fs",
+-            trackID.string().utf8().data(),
+-            trackBuffer.highestPresentationTimestamp.toDouble(),
+-            trackBuffer.lastFrameDuration.toDouble(),
+-            trackBuffer.lastEnqueuedPresentationTime.toDouble(),
+-            trackBuffer.lastEnqueuedDecodeEndTime.toDouble(),
+-            trackBuffer.lastDecodeTimestamp.toDouble());
++        if(gPerSampleLogging)
++            LOG(MediaSource,
++                "trackBuffer %s  HPTS %fs LFD %fs LEPTS %fs LEDET %fs LDT %fs",
++                trackID.string().utf8().data(),
++                trackBuffer.highestPresentationTimestamp.toDouble(),
++                trackBuffer.lastFrameDuration.toDouble(),
++                trackBuffer.lastEnqueuedPresentationTime.toDouble(),
++                trackBuffer.lastEnqueuedDecodeEndTime.toDouble(),
++                trackBuffer.lastDecodeTimestamp.toDouble());
+ 
+         // 1.6 ↳ If last decode timestamp for track buffer is set and decode timestamp is less than last
+         // decode timestamp:
+@@ -1996,21 +2066,22 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(MediaSample& sample)
+                 bypassAppend =
+                     equalPTS && equalDTS && equalDUR && equalSIZE && presentSIZE && equalSYNC && equalNONDISP;
+ 
+-                LOG(
+-                    MediaSource,
+-                    "dup (%d%d%d%d%d%d%d)? %s PTS:%fs DTS %fs DUR: %fs SIZE %zub"
+-                    "-> %s PTS:%fs DTS %fs DUR: %fs SIZE %zub",
+-                    equalPTS, equalDTS, equalDUR, equalSIZE, presentSIZE, equalSYNC, equalNONDISP,
+-                    sample.trackID().string().utf8().data(),
+-                    sample.presentationTime().toDouble(),
+-                    sample.decodeTime().toDouble(),
+-                    sample.duration().toDouble(),
+-                    sample.sizeInBytes(),
+-                    bufferedSample->trackID().string().utf8().data(),
+-                    bufferedSample->presentationTime().toDouble(),
+-                    bufferedSample->decodeTime().toDouble(),
+-                    bufferedSample->duration().toDouble(),
+-                    bufferedSample->sizeInBytes());
++                if(gPerSampleLogging)
++                    LOG(
++                        MediaSource,
++                        "dup (%d%d%d%d%d%d%d)? %s PTS:%fs DTS %fs DUR: %fs SIZE %zub"
++                        "-> %s PTS:%fs DTS %fs DUR: %fs SIZE %zub",
++                        equalPTS, equalDTS, equalDUR, equalSIZE, presentSIZE, equalSYNC, equalNONDISP,
++                        sample.trackID().string().utf8().data(),
++                        sample.presentationTime().toDouble(),
++                        sample.decodeTime().toDouble(),
++                        sample.duration().toDouble(),
++                        sample.sizeInBytes(),
++                        bufferedSample->trackID().string().utf8().data(),
++                        bufferedSample->presentationTime().toDouble(),
++                        bufferedSample->decodeTime().toDouble(),
++                        bufferedSample->duration().toDouble(),
++                        bufferedSample->sizeInBytes());
+ 
+                 if(!bypassAppend) erasedSamples.addSample(*(foundInSamples->second));
+             }
+@@ -2073,13 +2144,14 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(MediaSample& sample)
+         {
+             DecodeOrderSampleMap::KeyType decodeKey(decodeTimestamp, presentationTimestamp);
+ 
+-            LOG(
+-                MediaSource,
+-                "INSERT %s PTS %fs DTS %fs DUR %fs",
+-                sample.trackID().string().utf8().data(),
+-                sample.presentationTime().toDouble(),
+-                sample.decodeTime().toDouble(),
+-                sample.duration().toDouble());
++            if(gPerSampleLogging)
++                LOG(
++                    MediaSource,
++                    "INSERT %s PTS %fs DTS %fs DUR %fs",
++                    sample.trackID().string().utf8().data(),
++                    sample.presentationTime().toDouble(),
++                    sample.decodeTime().toDouble(),
++                    sample.duration().toDouble());
+ 
+             trackBuffer.decodeQueue.insert(DecodeOrderSampleMap::MapType::value_type(decodeKey, &sample));
+         }
+@@ -2106,14 +2178,15 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(MediaSample& sample)
+ 
+         if (trackBuffer.highestPresentationTimestamp.isInvalid() || frameEndTimestamp > trackBuffer.highestPresentationTimestamp)
+         {
+-            LOG(
+-                MediaSource,
+-                "%s override HPTS %fs with %fs, PTS %fs DUR %fs",
+-                trackID.string().utf8().data(),
+-                trackBuffer.highestPresentationTimestamp.toDouble(),
+-                frameEndTimestamp.toDouble(),
+-                presentationTimestamp.toDouble(),
+-                frameDuration.toDouble());
++            if(gPerSampleLogging)
++                LOG(
++                    MediaSource,
++                    "%s override HPTS %fs with %fs, PTS %fs DUR %fs",
++                    trackID.string().utf8().data(),
++                    trackBuffer.highestPresentationTimestamp.toDouble(),
++                    frameEndTimestamp.toDouble(),
++                    presentationTimestamp.toDouble(),
++                    frameDuration.toDouble());
+             trackBuffer.highestPresentationTimestamp = frameEndTimestamp;
+         }
+ 
+@@ -2398,16 +2471,17 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, const AtomicString
+         trackBuffer.lastEnqueuedPresentationTime = sample->presentationTime();
+         trackBuffer.lastEnqueuedDecodeEndTime = sample->decodeTime() + sample->duration();
+ 
+-        LOG(
+-            MediaSource,
+-            "%p %fs %s PTS %fs DTS %fs DUR %fs %zub",
+-            this,
+-            MediaTime{g_get_monotonic_time(), GST_USECOND}.toDouble(),
+-            trackID.string().utf8().data(),
+-            sample->presentationTime().toDouble(),
+-            sample->decodeTime().toDouble(),
+-            sample->duration().toDouble(),
+-            sample->sizeInBytes());
++        if(gPerSampleLogging)
++            LOG(
++                MediaSource,
++                "%p %fs %s PTS %fs DTS %fs DUR %fs %zub",
++                this,
++                MediaTime{g_get_monotonic_time(), GST_USECOND}.toDouble(),
++                trackID.string().utf8().data(),
++                sample->presentationTime().toDouble(),
++                sample->decodeTime().toDouble(),
++                sample->duration().toDouble(),
++                sample->sizeInBytes());
+ 
+         m_private->enqueueSample(sample.releaseNonNull(), trackID);
+ #if !LOG_DISABLED
+@@ -2450,19 +2524,24 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, const AtomicString
+ 
+ void SourceBuffer::reenqueueMediaForTime(TrackBuffer& trackBuffer, const AtomicString& trackID, const MediaTime& time)
+ {
++    const auto currentMediaTime = m_source->currentTime();
++
+     LOG(
+         MediaSource,
+         "%p "
+         "time %fs "
+         "%s "
++        "currTime %fs "
+         "decodeQueue.size %zub "
+         "HPTS %fs "
+         "LEPTS %fs "
+         "LEDET %fs  "
+         "LFD %fs "
+         "buffered %s",
+-        this, time.toDouble(),
++        this,
++        time.toDouble(),
+         trackID.string().utf8().data(),
++        currentMediaTime.toDouble(),
+         trackBuffer.decodeQueue.size(),
+         trackBuffer.highestPresentationTimestamp.toDouble(),
+         trackBuffer.lastEnqueuedPresentationTime.toDouble(),
+@@ -2470,15 +2549,8 @@ void SourceBuffer::reenqueueMediaForTime(TrackBuffer& trackBuffer, const AtomicS
+         trackBuffer.lastFrameDuration.toDouble(),
+         toString(m_buffered->ranges()).utf8().data());
+ 
+-    const MediaTime currentMediaTime = m_source->currentTime();
+     const auto beginTimestamp = g_get_monotonic_time();
+ 
+-    LOG(
+-            MediaSource,
+-            "%s %fs",
+-            trackID.string().utf8().data(),
+-            currentMediaTime.toDouble());
+-
+     m_private->flush(trackID);
+     trackBuffer.decodeQueue.clear();
+ 
+@@ -2507,14 +2579,15 @@ void SourceBuffer::reenqueueMediaForTime(TrackBuffer& trackBuffer, const AtomicS
+         auto copy = iter->second->createNonDisplayingCopy();
+         DecodeOrderSampleMap::KeyType decodeKey(copy->decodeTime(), copy->presentationTime());
+ 
+-        LOG(
+-            MediaSource,
+-            "decodeQueue insert nondisplay %s PTS %fs DTS %fs DUR %fs %zub",
+-            copy->trackID().string().utf8().data(),
+-            copy->presentationTime().toDouble(),
+-            copy->decodeTime().toDouble(),
+-            copy->duration().toDouble(),
+-            copy->sizeInBytes());
++        if(gPerSampleLogging)
++            LOG(
++                MediaSource,
++                "decodeQueue insert nondisplay %s PTS %fs DTS %fs DUR %fs %zub",
++                copy->trackID().string().utf8().data(),
++                copy->presentationTime().toDouble(),
++                copy->decodeTime().toDouble(),
++                copy->duration().toDouble(),
++                copy->sizeInBytes());
+ 
+         trackBuffer.decodeQueue.insert(DecodeOrderSampleMap::MapType::value_type(decodeKey, WTFMove(copy)));
+     }
+@@ -2530,12 +2603,29 @@ void SourceBuffer::reenqueueMediaForTime(TrackBuffer& trackBuffer, const AtomicS
+         trackBuffer.lastEnqueuedDecodeEndTime = MediaTime::invalidTime();
+     }
+ 
++    // Fill the decode queue with the remaining samples.
++    for (auto iter = currentSampleDTSIterator; iter != trackBuffer.samples.decodeOrder().end(); ++iter)
++    {
++
++        if(gPerSampleLogging)
++            LOG(
++                MediaSource,
++                "decodeQueue insert %s PTS %fs DTS %fs DUR %fs %zub",
++                iter->second->trackID().string().utf8().data(),
++                iter->second->presentationTime().toDouble(),
++                iter->second->decodeTime().toDouble(),
++                iter->second->duration().toDouble(),
++                iter->second->sizeInBytes());
++
++        trackBuffer.decodeQueue.insert(*iter);
++    }
++
+     LOG(
+         MediaSource,
+         "%p "
+         "time %fs "
+         "%s "
+-        "decodeQueue.size %zu "
++        "decodeQueue.size %zub "
+         "HPTS %fs "
+         "LEPTS %fs "
+         "LEDET %fs "
+@@ -2551,20 +2641,6 @@ void SourceBuffer::reenqueueMediaForTime(TrackBuffer& trackBuffer, const AtomicS
+         trackBuffer.lastFrameDuration.toDouble(),
+         toString(m_buffered->ranges()).utf8().data());
+ 
+-    // Fill the decode queue with the remaining samples.
+-    for (auto iter = currentSampleDTSIterator; iter != trackBuffer.samples.decodeOrder().end(); ++iter)
+-    {
+-        LOG(
+-            MediaSource,
+-            "decodeQueue insert %s PTS %fs DTS %fs DUR %fs %zub",
+-            iter->second->trackID().string().utf8().data(),
+-            iter->second->presentationTime().toDouble(),
+-            iter->second->decodeTime().toDouble(),
+-            iter->second->duration().toDouble(),
+-            iter->second->sizeInBytes());
+-
+-        trackBuffer.decodeQueue.insert(*iter);
+-    }
+     provideMediaData(trackBuffer, trackID);
+ 
+     trackBuffer.needsReenqueueing = false;
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.h
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.h
+@@ -114,6 +114,7 @@ public:
+     void setBufferedDirty(bool flag) { m_bufferedDirty = flag; }
+ 
+     MediaTime highestPresentationTimestamp() const;
++    MediaTime lowestPresentationTimestamp() const;
+     void readyStateChanged();
+ 
+     bool hasPendingActivity() const final;
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
+@@ -511,14 +511,22 @@ void MediaPlayerPrivateGStreamerMSE::seekCompleted()
+ 
+ void MediaPlayerPrivateGStreamerMSE::setRate(float rate)
+ {
+-    if (m_playbackRate == rate) {
++    const auto currTime = currentMediaTime();
++
++    GST_DEBUG_OBJECT(m_pipeline.get(), "%f (curr %f) currTime %fs", rate, m_playbackRate, currTime.toDouble());
++
++    if(m_playbackRate == rate) return;
++    if(0 == rate)
++    {
++        GST_WARNING_OBJECT(m_pipeline.get(), "invalid rate %f (curr %f), skip", rate, m_playbackRate);
+         return;
+     }
++
+     float lastPlaybackRate = m_playbackRate;
+     m_playbackRate = rate;
+     m_player->rateChanged();
+ 
+-    m_seekTime = currentMediaTime().toDouble();
++    m_seekTime = currTime.toDouble();
+     if (!doSeek()) {
+         m_playbackRate = lastPlaybackRate;
+         m_player->rateChanged();

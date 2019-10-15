@@ -1,0 +1,104 @@
+[ONEM-10000] Add key attribute to DOM level 3 KeyboardEvent
+
+Jacek Manko <jacek.manko@redembedded.com>
+
+diff --git a/Source/WebKit2/Shared/WebEvent.h b/Source/WebKit2/Shared/WebEvent.h
+index 4eb51e397..a1100d1c8 100644
+--- a/Source/WebKit2/Shared/WebEvent.h
++++ b/Source/WebKit2/Shared/WebEvent.h
+@@ -249,6 +249,8 @@ public:
+     WebKeyboardEvent(Type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, bool handledByInputMethod, Vector<String>&& commands, bool isKeypad, Modifiers, double timestamp);
+ #elif PLATFORM(IOS)
+     WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, double timestamp);
++#elif ENABLE(KEYBOARD_KEY_ATTRIBUTE)
++    WebKeyboardEvent(Type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, double timestamp);
+ #else
+     WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, double timestamp);
+ #endif
+@@ -256,6 +258,7 @@ public:
+     const String& text() const { return m_text; }
+     const String& unmodifiedText() const { return m_unmodifiedText; }
+ #if ENABLE(KEYBOARD_KEY_ATTRIBUTE)
++
+     const String& key() const { return m_key; }
+ #endif
+ #if ENABLE(KEYBOARD_CODE_ATTRIBUTE)
+diff --git a/Source/WebKit2/Shared/WebKeyboardEvent.cpp b/Source/WebKit2/Shared/WebKeyboardEvent.cpp
+index eb4771fda..316cfbe9d 100644
+--- a/Source/WebKit2/Shared/WebKeyboardEvent.cpp
++++ b/Source/WebKit2/Shared/WebKeyboardEvent.cpp
+@@ -104,6 +104,25 @@ WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String&
+     ASSERT(isKeyboardEventType(type));
+ }
+ 
++#elif ENABLE(KEYBOARD_KEY_ATTRIBUTE)
++
++WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, double timestamp)
++    : WebEvent(type, modifiers, timestamp)
++    , m_text(text)
++    , m_unmodifiedText(text)
++    , m_key(key)
++    , m_code(code)
++    , m_keyIdentifier(keyIdentifier)
++    , m_windowsVirtualKeyCode(windowsVirtualKeyCode)
++    , m_nativeVirtualKeyCode(nativeVirtualKeyCode)
++    , m_macCharCode(macCharCode)
++    , m_isAutoRepeat(false)
++    , m_isKeypad(isKeypad)
++    , m_isSystemKey(false)
++{
++    ASSERT(isKeyboardEventType(type));
++}
++
+ #else
+ 
+ WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, double timestamp)
+diff --git a/Source/WebKit2/Shared/wpe/WebEventFactory.cpp b/Source/WebKit2/Shared/wpe/WebEventFactory.cpp
+index e7820d5c7..25577a4ef 100644
+--- a/Source/WebKit2/Shared/wpe/WebEventFactory.cpp
++++ b/Source/WebKit2/Shared/wpe/WebEventFactory.cpp
+@@ -72,13 +72,24 @@ static String identifierStringForKeyEvent(struct wpe_input_keyboard_event* event
+     return String::format("U+%04X", event->unicode);
+ }
+ 
++static String keyStringForKeyEvent(struct wpe_input_keyboard_event* event)
++{
++    const char* keyString = wpe_input_key_string_for_key_event(wpe_input_key_mapper_get_singleton(), event);
++    if (keyString)
++        return String(keyString);
++
++    return String::format("Unidentified");
++}
++
+ WebKeyboardEvent WebEventFactory::createWebKeyboardEvent(struct wpe_input_keyboard_event* event)
+ {
+     String singleCharacterString = singleCharacterStringForKeyEvent(event);
+     String identifierString = identifierStringForKeyEvent(event);
++    String keyString = keyStringForKeyEvent(event);
+ 
++    // TODO: add proper values for "code" attribute
+     return WebKeyboardEvent(event->pressed ? WebEvent::KeyDown : WebEvent::KeyUp,
+-        singleCharacterString, singleCharacterString, identifierString,
++        singleCharacterString, keyString, identifierString, identifierString,
+         wpe_input_windows_key_code_for_key_event(wpe_input_key_mapper_get_singleton(), event),
+         event->keyCode, 0, false, false, false,
+         modifiersForEvent(event), event->time);
+diff --git a/Source/cmake/OptionsWPE.cmake b/Source/cmake/OptionsWPE.cmake
+index be23ab96e..5dacaa217 100644
+--- a/Source/cmake/OptionsWPE.cmake
++++ b/Source/cmake/OptionsWPE.cmake
+@@ -225,6 +225,14 @@ if (ENABLE_LOGS)
+     SET_AND_EXPOSE_TO_BUILD(FATAL_DISABLED FALSE)
+ endif ()
+ 
++if (ENABLE_KEYBOARD_KEY_ATTRIBUTE)
++    SET_AND_EXPOSE_TO_BUILD(ENABLE_KEYBOARD_KEY_ATTRIBUTE TRUE)
++endif ()
++
++if (ENABLE_KEYBOARD_CODE_ATTRIBUTE)
++    SET_AND_EXPOSE_TO_BUILD(ENABLE_KEYBOARD_CODE_ATTRIBUTE TRUE)
++endif ()
++
+ set(FORWARDING_HEADERS_DIR ${DERIVED_SOURCES_DIR}/ForwardingHeaders)
+ 
+ # Build with -fvisibility=hidden to reduce the size of the shared library.

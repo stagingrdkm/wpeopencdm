@@ -1,0 +1,16 @@
+ONEM-9889: Add Network process termination to webkit API
+Jacek Skiba <jacek.skiba@redembedded.com>
+
+diff --git a/Source/WebKit2/UIProcess/API/C/WKContext.h b/Source/WebKit2/UIProcess/API/C/WKContext.h
+index e5a07a6fe2d..82334814f24 100644
+--- a/Source/WebKit2/UIProcess/API/C/WKContext.h
++++ b/Source/WebKit2/UIProcess/API/C/WKContext.h
+@@ -165,6 +165,8 @@ WK_EXPORT void WKContextSetPlugInAutoStartOrigins(WKContextRef contextRef, WKArr
+ WK_EXPORT void WKContextSetPlugInAutoStartOriginsFilteringOutEntriesAddedAfterTime(WKContextRef contextRef, WKDictionaryRef dictionaryRef, double time);
+ WK_EXPORT void WKContextRefreshPlugIns(WKContextRef context);
+ 
++WK_EXPORT void WKContextTerminateNetworkProcess(WKContextRef context);
++
+ #ifdef __cplusplus
+ }
+ #endif

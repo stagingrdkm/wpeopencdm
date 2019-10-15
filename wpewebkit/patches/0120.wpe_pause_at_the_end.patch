@@ -1,0 +1,47 @@
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -2209,7 +2209,7 @@ void MediaPlayerPrivateGStreamer::didEnd()
+         // FIXME: there's a bug in playbin handling the context messages that causes replaying a video
+         // not to work if we leave the pipeline in READY state. We set it to NULL here to workaround
+         // that issue, but this should be change back to READY when it gets fixed upstream.
+-        changePipelineState(GST_STATE_NULL);
++        changePipelineState(GST_STATE_PAUSED);
+     }
+ }
+ 
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
+@@ -289,7 +289,6 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek()
+     if ((getStateResult == GST_STATE_CHANGE_ASYNC
+         && !(state == GST_STATE_PLAYING && newState == GST_STATE_PAUSED))
+         || state < GST_STATE_PAUSED
+-        || m_isEndReached
+         || !m_gstSeekCompleted) {
+         CString reason = "unknown reason";
+         if (getStateResult == GST_STATE_CHANGE_ASYNC) {
+@@ -298,25 +297,12 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek()
+                 gst_element_state_get_name(newState)).utf8();
+         } else if (state < GST_STATE_PAUSED)
+             reason = "state less than PAUSED";
+-        else if (m_isEndReached)
+-            reason = "end reached";
+         else if (!m_gstSeekCompleted)
+             reason = "previous seek is not finished yet";
+ 
+         GST_DEBUG_OBJECT(m_pipeline.get(), "delaying the seek: %s", reason.data());
+ 
+         m_seekIsPending = true;
+-
+-        if (m_isEndReached) {
+-            GST_DEBUG_OBJECT(m_pipeline.get(), "reset pipeline");
+-            m_resetPipeline = true;
+-            m_seeking = false;
+-            if (!changePipelineState(GST_STATE_PAUSED))
+-                loadingFailed(MediaPlayer::Empty);
+-            else
+-                m_seeking = true;
+-        }
+-
+         return m_seeking;
+     }
+ 

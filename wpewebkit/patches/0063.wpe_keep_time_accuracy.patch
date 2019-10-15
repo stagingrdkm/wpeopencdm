@@ -1,0 +1,93 @@
+ONEM-9477: Do not downcast the seeks time from double to float.
+
+Pawel Stanek <pawel.stanek@redembedded.com>
+
+diff --git a/Source/WebCore/platform/graphics/MediaPlayer.cpp b/Source/WebCore/platform/graphics/MediaPlayer.cpp
+index f481ed63b68..21e5f85454d 100644
+--- a/Source/WebCore/platform/graphics/MediaPlayer.cpp
++++ b/Source/WebCore/platform/graphics/MediaPlayer.cpp
+@@ -129,7 +129,6 @@ public:
+     double durationDouble() const override { return 0; }
+ 
+     double currentTimeDouble() const override { return 0; }
+-    void seekDouble(double) override { }
+     bool seeking() const override { return false; }
+ 
+     void setRateDouble(double) override { }
+diff --git a/Source/WebCore/platform/graphics/MediaPlayerPrivate.h b/Source/WebCore/platform/graphics/MediaPlayerPrivate.h
+index 932f69cef29..3e8bcb0567f 100644
+--- a/Source/WebCore/platform/graphics/MediaPlayerPrivate.h
++++ b/Source/WebCore/platform/graphics/MediaPlayerPrivate.h
+@@ -99,9 +99,8 @@ public:
+ 
+     virtual MediaTime getStartDate() const { return MediaTime::createWithDouble(std::numeric_limits<double>::quiet_NaN()); }
+ 
+-    virtual void seek(float) { }
+-    virtual void seekDouble(double time) { seek(time); }
+-    virtual void seek(const MediaTime& time) { seekDouble(time.toDouble()); }
++    virtual void seek(double) { }
++    virtual void seek(const MediaTime& time) { seek(time.toDouble()); }
+     virtual void seekWithTolerance(const MediaTime& time, const MediaTime&, const MediaTime&) { seek(time); }
+ 
+     virtual bool seeking() const = 0;
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index 3b78b95504a..5004af854bc 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -685,7 +685,7 @@ MediaTime MediaPlayerPrivateGStreamer::currentMediaTime() const
+     return MediaTime::createWithDouble(playbackPosition());
+ }
+ 
+-void MediaPlayerPrivateGStreamer::seek(float time)
++void MediaPlayerPrivateGStreamer::seek(double time)
+ {
+     if (!m_pipeline)
+         return;
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
+index acad35f6198..86daf3d565d 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
+@@ -97,7 +97,7 @@ public:
+ 
+     MediaTime durationMediaTime() const override;
+     MediaTime currentMediaTime() const override;
+-    void seek(float) override;
++    void seek(double) override;
+ 
+     void setRate(float) override;
+     double rate() const override;
+@@ -194,7 +194,7 @@ protected:
+     bool m_resetPipeline;
+     bool m_seeking;
+     bool m_seekIsPending;
+-    float m_seekTime;
++    double m_seekTime;
+     GRefPtr<GstElement> m_source;
+     bool m_volumeAndMuteInitialized;
+ 
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
+index 2234a08fed9..830854af36b 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.cpp
+@@ -174,7 +174,7 @@ MediaTime MediaPlayerPrivateGStreamerMSE::durationMediaTime() const
+     return m_mediaTimeDuration;
+ }
+ 
+-void MediaPlayerPrivateGStreamerMSE::seek(float time)
++void MediaPlayerPrivateGStreamerMSE::seek(double time)
+ {
+     if (UNLIKELY(!m_pipeline || m_errorOccured))
+         return;
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
+index 5c99f2709ac..dfc86f86d23 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/MediaPlayerPrivateGStreamerMSE.h
+@@ -60,7 +60,7 @@ public:
+ 
+     void pause() override;
+     bool seeking() const override;
+-    void seek(float) override;
++    void seek(double) override;
+     void configurePlaySink() override;
+     bool changePipelineState(GstState) override;
+ 

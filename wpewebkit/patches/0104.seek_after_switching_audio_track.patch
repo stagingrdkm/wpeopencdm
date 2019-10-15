@@ -1,0 +1,162 @@
+[ARRISEOS-26884] Perform seek after switching audio tracks
+
+Jacek Manko <jacek.manko@redembedded.com>
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.cpp
+index fc2d67471..1f9f7af77 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.cpp
+@@ -31,11 +31,13 @@
+ 
+ #include <glib-object.h>
+ 
++#include <gst/gst.h>
++
+ namespace WebCore {
+ 
+-AudioTrackPrivateGStreamer::AudioTrackPrivateGStreamer(GRefPtr<GstElement> playbin, gint index, GRefPtr<GstPad> pad)
++AudioTrackPrivateGStreamer::AudioTrackPrivateGStreamer(MediaPlayerPrivateGStreamer* player, gint index, GRefPtr<GstPad> pad)
+     : TrackPrivateBaseGStreamer(this, index, pad)
+-    , m_playbin(playbin)
++    , m_player(player)
+ {
+     // FIXME: Get a real ID from the tkhd atom.
+     m_id = "A" + String::number(index);
+@@ -44,7 +46,6 @@ AudioTrackPrivateGStreamer::AudioTrackPrivateGStreamer(GRefPtr<GstElement> playb
+ 
+ void AudioTrackPrivateGStreamer::disconnect()
+ {
+-    m_playbin.clear();
+     TrackPrivateBaseGStreamer::disconnect();
+ }
+ 
+@@ -54,8 +55,26 @@ void AudioTrackPrivateGStreamer::setEnabled(bool enabled)
+         return;
+     AudioTrackPrivate::setEnabled(enabled);
+ 
+-    if (enabled && m_playbin)
+-        g_object_set(m_playbin.get(), "current-audio", m_index, nullptr);
++    if (enabled && m_player->pipeline()) {
++        gint current_index = 0;
++        g_object_get(m_player->pipeline(), "current-audio", &current_index, nullptr);
++        if (current_index != m_index) {
++            g_object_set(m_player->pipeline(), "current-audio", m_index, nullptr);
++
++            if (!m_player->isMediaSource() && GST_STATE(m_player->pipeline()) >= GST_STATE_PAUSED) {
++                auto query = adoptGRef(gst_query_new_seeking(GST_FORMAT_TIME));
++                if (gst_element_query(m_player->pipeline(), query.get()))
++                {
++                    gint64 position = GST_CLOCK_TIME_NONE;
++                    gst_query_parse_position(query.get(), 0, &position);
++                    m_player->doSeek(
++                            position,
++                            m_player->rate(),
++                            static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | MediaPlayerPrivateGStreamer::hardwareDependantSeekFlags()));
++                }
++            }
++        }
++    }
+ }
+ 
+ } // namespace WebCore
+diff --git a/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.h b/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.h
+index 472aa7ddd..b03a2d12f 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.h
++++ b/Source/WebCore/platform/graphics/gstreamer/AudioTrackPrivateGStreamer.h
+@@ -30,15 +30,16 @@
+ 
+ #include "AudioTrackPrivate.h"
+ #include "GRefPtrGStreamer.h"
++#include "MediaPlayerPrivateGStreamer.h"
+ #include "TrackPrivateBaseGStreamer.h"
+ 
+ namespace WebCore {
+ 
+ class AudioTrackPrivateGStreamer final : public AudioTrackPrivate, public TrackPrivateBaseGStreamer {
+ public:
+-    static RefPtr<AudioTrackPrivateGStreamer> create(GRefPtr<GstElement> playbin, gint index, GRefPtr<GstPad> pad)
++    static RefPtr<AudioTrackPrivateGStreamer> create(MediaPlayerPrivateGStreamer* player, gint index, GRefPtr<GstPad> pad)
+     {
+-        return adoptRef(*new AudioTrackPrivateGStreamer(playbin, index, pad));
++        return adoptRef(*new AudioTrackPrivateGStreamer(player, index, pad));
+     }
+ 
+     void disconnect() override;
+@@ -53,10 +54,10 @@ public:
+     AtomicString language() const override { return m_language; }
+ 
+ private:
+-    AudioTrackPrivateGStreamer(GRefPtr<GstElement> playbin, gint index, GRefPtr<GstPad>);
++    AudioTrackPrivateGStreamer(MediaPlayerPrivateGStreamer* player, gint index, GRefPtr<GstPad>);
+ 
+     AtomicString m_id;
+-    GRefPtr<GstElement> m_playbin;
++    MediaPlayerPrivateGStreamer* m_player;
+ };
+ 
+ } // namespace WebCore
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index 08bee0fa0..b3d240684 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -975,7 +975,7 @@ void MediaPlayerPrivateGStreamer::notifyPlayerOfAudio()
+                 continue;
+         }
+ 
+-        RefPtr<AudioTrackPrivateGStreamer> track = AudioTrackPrivateGStreamer::create(m_pipeline, i, pad);
++        RefPtr<AudioTrackPrivateGStreamer> track = AudioTrackPrivateGStreamer::create(this, i, pad);
+ 
+         m_audioTracks.insert(i, track);
+         m_player->addAudioTrack(*track);
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
+index 80a7cb8df..dfbc30cde 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h
+@@ -146,6 +146,10 @@ public:
+     GRefPtr<GstElement> m_mpegAudioParse;
+ #endif
+ 
++    static GstSeekFlags hardwareDependantSeekFlags();
++    virtual bool doSeek(gint64 position, float rate, GstSeekFlags seekType);
++    virtual bool isMediaSource() const { return false; }
++
+ private:
+     static void getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>&);
+     static MediaPlayer::SupportsType supportsType(const MediaEngineSupportParameters&);
+@@ -175,7 +179,6 @@ private:
+     void processTableOfContents(GstMessage*);
+     void processTableOfContentsEntry(GstTocEntry*);
+ #endif
+-    virtual bool doSeek(gint64 position, float rate, GstSeekFlags seekType);
+     virtual void updatePlaybackRate();
+ 
+     String engineDescription() const override { return "GStreamer"; }
+@@ -210,7 +213,6 @@ protected:
+     GRefPtr<GstElement> m_source;
+     bool m_volumeAndMuteInitialized;
+ 
+-    static GstSeekFlags hardwareDependantSeekFlags();
+     void readyTimerFired();
+ 
+     void notifyPlayerOfVideo();
+@@ -276,7 +278,6 @@ private:
+ #if ENABLE(VIDEO_TRACK) && USE(GSTREAMER_MPEGTS)
+     HashMap<AtomicString, RefPtr<InbandMetadataTextTrackPrivateGStreamer>> m_metadataTracks;
+ #endif
+-    virtual bool isMediaSource() const { return false; }
+     int m_mediaCacheVarState;
+     mutable MediaTime m_lastKnownDuration = MediaTime::invalidTime();
+     bool m_startStreamSeen = false;
+diff --git a/Source/WebCore/platform/graphics/gstreamer/mse/AppendPipeline.cpp b/Source/WebCore/platform/graphics/gstreamer/mse/AppendPipeline.cpp
+index 07c4b93d3..e0964ffa1 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/mse/AppendPipeline.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/mse/AppendPipeline.cpp
+@@ -1244,7 +1244,7 @@ void AppendPipeline::connectDemuxerSrcPadToAppsink(GstPad* demuxerSrcPad)
+     switch (m_streamType) {
+     case WebCore::MediaSourceStreamTypeGStreamer::Audio:
+         if (m_playerPrivate)
+-            m_track = WebCore::AudioTrackPrivateGStreamer::create(m_playerPrivate->pipeline(), id(), sinkSinkPad.get());
++            m_track = WebCore::AudioTrackPrivateGStreamer::create(m_playerPrivate, id(), sinkSinkPad.get());
+         break;
+     case WebCore::MediaSourceStreamTypeGStreamer::Video:
+         if (m_playerPrivate)
