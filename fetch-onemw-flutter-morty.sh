@@ -2,7 +2,7 @@
 
 set -e
 
-# ONEMW source fetcher and build script by Damian Wrobel
+# ONEMW flutter source fetcher and build script by Damian Wrobel
 #
 # Author: Damian Wrobel <dwrobel@ertelnet.rybnik.pl>
 # Version: v0.1
@@ -74,7 +74,11 @@ IMAGE_INSTALL_append = " flutter-launcher"
 IMAGE_INSTALL_append = " flutter-launcher-glfw"
 IMAGE_INSTALL_append = " flutter-launcher-wayland"
 
+IMAGE_INSTALL_append = " flutter-examples-dataviz"
+IMAGE_INSTALL_append = " flutter-examples-filipino-cuisine"
 IMAGE_INSTALL_append = " flutter-examples-gallery"
+IMAGE_INSTALL_append = " flutter-examples-slide-puzzle"
+
 EOD
 
 # Rebuild packages from source
