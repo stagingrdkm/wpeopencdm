@@ -26,6 +26,7 @@ cherry_picks=(
     meta-lgi-om-common:48178 # ONEM-10964 nss: update to 3.28.1
     meta-lgi-om-common:49322 # ONEM-10964 Prevent programs run as root to crash
     meta-lgi-om-common:51256 # ONEM-10964 Enable building glfw shared library
+    meta-lgi-om-common:52457 # ONEM-10964 Introduce elfio library
     meta-lgi-om-common:50940 # ONEM-10964 Flutter Engine - beautiful mobile apps (POC)
 )
 
