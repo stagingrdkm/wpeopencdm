@@ -90,3 +90,5 @@ sed -i 's/^\(BINPKG_ignition.*\)/# \1/g' conf/local.conf
 
 [ "$0" = "$BASH_SOURCE" ] && time bitbake core-image-efl-nodejs || echo 'run bitbake core-image-efl-nodejs # or any other command'
 EOF
+
+[ -f $LOG ] && (cat $LOG; exit 2)
