@@ -5,13 +5,12 @@ set -e
 # ONEMW flutter source fetcher and build script by Damian Wrobel
 #
 # Author: Damian Wrobel <dwrobel@ertelnet.rybnik.pl>
-# Version: v0.2
+# Version: v0.3
 
 # Assumes you have "onemw-gerrit.sh" somewhere in your $PATH
 
 
 git clone ssh://gerrit.onemw.net:29418/onemw-manifests
-(cd onemw-manifests; onemw-gerrit.sh onemw-manifests:42838) # ONEM-12220 ONEM-12398 Adds support for yocto 2.2 (xml)
 (cd onemw-manifests; onemw-gerrit.sh onemw-manifests:45948) # ONEM-10964 Add meta-browser and update meta-clang layer
 (cd onemw-manifests; sed -i 's#ssh://gerrit.onemw.net:29418/onemw-manifests#file://${PWD}#' *.conf.*) # Use LG manifests from "this" repository"
 (cd onemw-manifests; sed -i 's/\(repo sync\)/\1 -j$\(getconf _NPROCESSORS_ONLN\)/g'   common_build.sh)  # Speed up repo tool a little bit
