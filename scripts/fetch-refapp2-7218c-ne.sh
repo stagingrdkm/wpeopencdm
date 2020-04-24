@@ -128,6 +128,13 @@ BRCMEXTERNALSRC_pn-camgr-server += "components/generic/camgr"
 SRCPV_pn-camgr-server = "\${BRCMEXTERNAL-SRCPV-CMF}"
 EOF
 
+### wpewebkit #######
+## in meta-wpe, wpewebkit 2.22 was made new preferred version but now wpewebkit plugin does not start
+## anymore in wpeframework. Forcing version 20170728 here again, until 2.22 working
+echo 'DEFAULT_PREFERENCE = "-1"' >> meta-wpe/recipes-wpe/wpewebkit/wpewebkit_2.22.bb
+sed -i '/DEFAULT_PREFERENCE/d' meta-wpe/recipes-wpe/wpewebkit/wpewebkit_20170728.bb
+###############
+
 ############# AAMP with OCDM #########
 ## go to latest developments of aamp
 (cd rdk/components/generic/aamp; git checkout dev_sprint)
