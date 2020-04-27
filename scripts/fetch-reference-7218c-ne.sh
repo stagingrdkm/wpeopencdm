@@ -6,9 +6,9 @@ export TGZS_DIR=/data/rdk/19.2.1/
 #########
  
 ######### Build setup and repo sync
-rm -rf 7218c_refapp2
-mkdir 7218c_refapp2
-cd 7218c_refapp2
+rm -rf 7218c_reference
+mkdir 7218c_reference
+cd 7218c_reference
 
 if [ -n "$(find "../../downloads" -maxdepth 2 -type d -empty 2>/dev/null)" ]; then
     rm -rf downloads
@@ -69,7 +69,7 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/2 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/4 && git cherry-pick FETCH_HEAD)
 
 ## take latest brcm rdk layer
 (rm -rf meta-rdk-broadcom-generic-rdk;git clone "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" meta-rdk-broadcom-generic-rdk)
@@ -107,9 +107,6 @@ sed -i 's/^SYSTEMD_SERVICE_/#SYSTEMD_SERVICE_/' meta-rdk-broadcom-generic-rdk/me
 
 # do not remove aampplayer-mpd-by-default.patch 
 sed -i 's/^SRC_URI_remove/#SRC_URI_remove/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/rdkmediaplayer/rdkmediaplayer.bbappend
-
-# fix for aamp player, RDKCMF-8626 Enable westerossink for AAMP on RPI refapp builds
-sed -i "/write_reboot$/ased -i  '/PLAYERSINKBIN_USE_WESTEROSSINK/iexport AAMP_ENABLE_WESTEROS_SINK=1' \${D}/lib/rdk/runAppManager.sh" meta-cmf-video-restricted/recipes-extended/appmanager/appmanager_git.bbappend
 
 # enable SWRDKV-2168.wpewebkit.eme_test_playready_keysystems.patch so that EME test 33 succeeds
 sed -i 's|#SRC_URI += "file://SWRDKV-2168|SRC_URI += "file://SWRDKV-2168|' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpewebkit/wpewebkit*.bbappend
@@ -225,16 +222,16 @@ declare -x RDK_ENABLE_WPE_METROLOGICAL="y"
 declare -x RDK_WITH_OPENCDM="y"
  
 . ./meta-rdk-broadcom-generic-rdk/setup-environment-refboard-rdkv
-grep conf/local.conf -e "refapp2.inc" || echo "require conf/distro/include/refapp2.inc" >>  conf/local.conf
+grep conf/local.conf -e "reference.inc" || echo "require conf/distro/include/reference.inc" >>  conf/local.conf
 
 echo 'SPLASH = ""' >> conf/local.conf
 echo 'IMAGE_FSTYPES += "ext2.gz"' >> conf/local.conf
 
-echo RUN FOLLOWING TO BUILD: bitbake rdk-generic-refapp2-image
+echo RUN FOLLOWING TO BUILD: bitbake rdk-generic-reference-image
 echo "PS1: you will need playready 3/4 key for playready encrypted content here: /home/root/playready3x.bin"
 echo "PS2: use aamp-cli to test some streams (make sure to export AAMP_ENABLE_WESTEROS_SINK=1) :"
 echo "  CLEAR: http://amssamples.streaming.mediaservices.windows.net/683f7e47-bd83-4427-b0a3-26a6c4547782/BigBuckBunny.ism/manifest(format=mpd-time-csf)"
 echo "  PLAYREADY: https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/mpds/11331.mpd"
 EOF
 
-echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_refapp2; source _build.sh"
+echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_reference; source _build.sh"
