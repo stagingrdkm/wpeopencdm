@@ -1,14 +1,31 @@
 #!/bin/bash
 set -e
 
+TARGET_DIR_SUFFIX=""
+if [ -z "$1" ]; then
+  CONF_HW_REV="ne"
+else
+  CONF_HW_REV="$1"
+  TARGET_DIR_SUFFIX="_$CONF_HW_REV"
+fi
+
+if [ "$CONF_HW_REV" != "ne" ] && [ "$CONF_HW_REV" != "zb" ]; then
+  echo "Unsupported CONF_HW_REV: $CONF_HW_REV"
+  exit
+fi
+
+echo "***** SETTING UP for HW_REV = $CONF_HW_REV *****"
+echo "(pass zb or ne as argument to change)"
+sleep 1
+
 ######### Edit directory below where to find 19.2 tarballs
 export TGZS_DIR=/data/rdk/19.2.1/
 #########
  
 ######### Build setup and repo sync
-rm -rf 7218c_reference
-mkdir 7218c_reference
-cd 7218c_reference
+rm -rf 7218c_reference$TARGET_DIR_SUFFIX
+mkdir 7218c_reference$TARGET_DIR_SUFFIX
+cd 7218c_reference$TARGET_DIR_SUFFIX
 
 if [ -n "$(find "../../downloads" -maxdepth 2 -type d -empty 2>/dev/null)" ]; then
     rm -rf downloads
@@ -56,9 +73,6 @@ download_list=(
     "$TGZS_DIR/stblinux-4.9-1.15.tar.bz2#downloads/"
     "$TGZS_DIR/applibs_release_DirectFB_hal-1.7.6.src-2.1.tgz#downloads/"
     "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_19.2.1_20200201_3pip_broadcom.tgz"
-    "s3://lgi-onemw-staging/dev-tools/rdk2.0/downloads/SAGESW_7216B0_NE_Nagra_4_1_3_E1_LibertyGlo_5330.tar.gz#downloads/"
-    "s3://lgi-onemw-staging/dev-tools/rdk2.0/downloads/SVPFW_HVD_2_27_12_0_7216B0_NE_E1.tgz#downloads/"
-    "s3://lgi-onemw-staging/dev-tools/rdk2.0/downloads/SVPFW_RAVE_1_8_0_7216B0_NE_E1.tar.gz#downloads/"
 )
 
 for i in ${download_list[@]}; do
@@ -74,9 +88,6 @@ done
 ## take latest brcm rdk layer
 (rm -rf meta-rdk-broadcom-generic-rdk;git clone "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" meta-rdk-broadcom-generic-rdk)
 (cd meta-rdk-broadcom-generic-rdk; git checkout rdk-next)
-
-##NE support
-git clone git@github.com:LibertyGlobal/meta-lgi-7218c
 
 ######### update checksums, LG specific!
 sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
@@ -156,10 +167,29 @@ sed -i 's/-locdm -lsec_api"/-locdm"/' rdk/components/generic/gst-plugins-rdk-aam
 ####################################
 
 ####### copy missing files from LG layers - NE support. Drop this entire part in case you want ZB support.
-cp meta-lgi-7218c/meta-rdk-broadcom-generic-rdk/meta-brcm-generic-rdk/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2.1-generic-rdk/CS9324411-fix-frontend-v00-boards.patch meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw/
-cp meta-lgi-7218c/meta-rdk-broadcom-generic-rdk/meta-brcm-generic-rdk/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2-generic-rdk/nexus_regver_stub_key.c meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw/
-cp meta-lgi-7218c/meta-rdk-broadcom-generic-rdk/meta-brcm-generic-rdk/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2-generic-rdk/nexus_regver_stub_signatures.c meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw/
-cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
+if [ "$CONF_HW_REV" == "ne" ]; then
+  download_list_ne=(
+    # format: from#to
+    # where:
+    #  - from: is a src path
+    #  - to: is either dst directory or dst path name
+    "s3://lgi-onemw-staging/dev-tools/rdk2.0/downloads/SAGESW_7216B0_NE_Nagra_4_1_3_E1_LibertyGlo_5330.tar.gz#downloads/"
+    "s3://lgi-onemw-staging/dev-tools/rdk2.0/downloads/SVPFW_HVD_2_27_12_0_7216B0_NE_E1.tgz#downloads/"
+    "s3://lgi-onemw-staging/dev-tools/rdk2.0/downloads/SVPFW_RAVE_1_8_0_7216B0_NE_E1.tar.gz#downloads/"
+  )
+
+  for i in ${download_list_ne[@]}; do
+    IFS='#' read -a args <<< $i
+    from=${args[0]}
+    to=${args[1]}
+    download_file "${from}" "${to}"
+  done
+
+  git clone git@github.com:LibertyGlobal/meta-lgi-7218c
+  cp meta-lgi-7218c/meta-rdk-broadcom-generic-rdk/meta-brcm-generic-rdk/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2.1-generic-rdk/CS9324411-fix-frontend-v00-boards.patch meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw/
+  cp meta-lgi-7218c/meta-rdk-broadcom-generic-rdk/meta-brcm-generic-rdk/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2-generic-rdk/nexus_regver_stub_key.c meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw/
+  cp meta-lgi-7218c/meta-rdk-broadcom-generic-rdk/meta-brcm-generic-rdk/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2-generic-rdk/nexus_regver_stub_signatures.c meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw/
+  cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-bsp/broadcom-refsw/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
 # SAGE for Nagra, Playready, Widevine
 SAGEBIN_FILENAME="SAGESW_7216B0_NE_Nagra_4_1_3_E1_LibertyGlo_5330.tar.gz"
 SRC_URI += "http://127.0.0.1/\${SAGEBIN_FILENAME};name=sage_bin;unpack=0"
@@ -197,6 +227,7 @@ do_compile_prepend() {
     cp -f \${S}/nexus_regver_stub_signatures.c \${S}/nexus/modules/security/secv2/src
 }
 EOF
+fi
 
 cat <<EOF >> _build.sh
 ######### brcm972180hbc build
@@ -234,4 +265,4 @@ echo "  CLEAR: http://amssamples.streaming.mediaservices.windows.net/683f7e47-bd
 echo "  PLAYREADY: https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/mpds/11331.mpd"
 EOF
 
-echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_reference; source _build.sh"
+echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_reference$TARGET_DIR_SUFFIX; source _build.sh"
