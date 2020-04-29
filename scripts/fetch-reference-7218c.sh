@@ -83,7 +83,10 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
+## Create rdk-generic-reference-image
 (cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/4 && git cherry-pick FETCH_HEAD)
+## remove userland DEPENDS
+(cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/42/37942/1 && git cherry-pick FETCH_HEAD)
 
 ## take latest brcm rdk layer
 (rm -rf meta-rdk-broadcom-generic-rdk;git clone "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" meta-rdk-broadcom-generic-rdk)
@@ -99,15 +102,12 @@ sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad542
 sed -i 's/7eb654c171c383ab4a3b81f1a4f22f4b/7eb654c171c383ab4a3b81f1a4f22f4b/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
 sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
 
-# remove RPI specific dependency from cobalt, should probably be moved to raspberrypi layer
-sed -i 's/userland//' meta-cmf/recipes-extended/cobalt/cobalt_git.bb
-
 ## prevent protobuf build problem: force usage of older 2.6.1
 rm meta-openembedded/meta-oe/recipes-devtools/protobuf/protobuf_3.7.0.bb
 
 ## remove two merged patches
-sed -i '3d' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
-sed -i '3d' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
+sed -i 's#file://SWRDKV-1523.updating_buf_size_from_secbuf.patch;striplevel=1##'  meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
+sed -i 's#file://SWRDKV-1523.free_secbuf.patch;striplevel=1##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
 
 # OCDM plugins added by setting RDK_WITH_OPENCDM="y" before setup later in script
 # adding streamer manually
