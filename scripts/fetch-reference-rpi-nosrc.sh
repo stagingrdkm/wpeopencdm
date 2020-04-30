@@ -17,8 +17,6 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 (cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/47/37547/2 && git cherry-pick FETCH_HEAD)
 ## add refApp OVERRIDE check to externalsrc
 (cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/25/37525/1 && git cherry-pick FETCH_HEAD)
-## remove userland DEPENDS
-(cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/42/37942/1 && git cherry-pick FETCH_HEAD)
 
 # OCDM plugins added by setting RDK_WITH_OPENCDM="y" before setup later in script
 # adding streamer manually

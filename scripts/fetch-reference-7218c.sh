@@ -85,8 +85,6 @@ done
 ##### cherry picks
 ## Create rdk-generic-reference-image
 (cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/4 && git cherry-pick FETCH_HEAD)
-## remove userland DEPENDS
-(cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/42/37942/1 && git cherry-pick FETCH_HEAD)
 
 ## take latest brcm rdk layer
 (rm -rf meta-rdk-broadcom-generic-rdk;git clone "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" meta-rdk-broadcom-generic-rdk)
