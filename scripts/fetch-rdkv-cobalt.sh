@@ -1,6 +1,10 @@
 #!/bin/bash -e
 #
-# Script to build refapp image with cobalt framework for RDK-V
+# Script to build refapp image with cobalt framework and refapp2 for RDK-V
+#
+# Author: Damian Wrobel <dwrobel.contractor@libertyglobal.com>
+#
+# Version: 0.3
 #
 # Usage example:
 #  $ ./fetch-rdkv-cobalt.sh -d <dirname>                # <dirname> - where put sources
@@ -59,6 +63,13 @@ mkdir -p ${DIR}
 pushd ${DIR}
     repo init -u https://code.rdkcentral.com/r/manifests -b ${BRANCH} -m ${MANIFEST}.xml
     repo sync -j16 --no-clone-bundle --no-tags
+
+    # Temporary cherry-picks (not merged upstream) to build the image
+    if [ $PATCH == 1 ]; then
+	echo Apply patches...
+        # RDKCMF-8585 Add refapp2 (Lightning based)
+        (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/30/38330/1 && git cherry-pick FETCH_HEAD)
+    fi
 popd
 
 
