@@ -36,8 +36,12 @@ fi
 
 [ -d downloads ] || mkdir -p downloads
 
-repo init --no-clone-bundle -u https://code.rdkcentral.com/r/rdk/yocto_oe/manifests/bcm-accel-manifests -b rdk-next -m default_collaboration.xml
+repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
+
+mkdir rdkmanifests
+cp .repo/manifests/reference/auto.conf ./rdkmanifests/auto.conf
+cp .repo/manifests/reference/cmf_revision.txt ./rdkmanifests/cmf_revision.txt
 
 function download_file() {
     local from="$1"
@@ -86,10 +90,6 @@ done
 ## Create rdk-generic-reference-image
 (cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/4 && git cherry-pick FETCH_HEAD)
 
-## take latest brcm rdk layer
-(rm -rf meta-rdk-broadcom-generic-rdk;git clone "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" meta-rdk-broadcom-generic-rdk)
-(cd meta-rdk-broadcom-generic-rdk; git checkout rdk-next)
-
 ######### update checksums, LG specific!
 sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
 sed -i 's/11f0d0dede527c355db0459a1a4145e85a8571dab5a5a7628e35a6baa174352d/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
@@ -123,17 +123,6 @@ sed -i 's|#SRC_URI += "file://SWRDKV-2168|SRC_URI += "file://SWRDKV-2168|' meta-
 # to enable ocdm brcm adapter in wpeframework (broadcom_svp)
 echo 'DISTRO_FEATURES_append += " nexus_svp"' >>  meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/conf/opencdm.conf
 
-cat <<EOF >> .repo/manifests/auto.conf
-BRCMEXTERNALSRC_pn-camgr += "components/generic/camgr"
-SRCPV_pn-camgr = "\${BRCMEXTERNAL-SRCPV-CMF}"
-BRCMEXTERNALSRC_pn-camgr-tests += "components/generic/camgr"
-SRCPV_pn-camgr-tests = "\${BRCMEXTERNAL-SRCPV-CMF}"
-BRCMEXTERNALSRC_pn-camgr-proxy += "components/generic/camgr"
-SRCPV_pn-camgr-proxy = "\${BRCMEXTERNAL-SRCPV-CMF}"
-BRCMEXTERNALSRC_pn-camgr-server += "components/generic/camgr"
-SRCPV_pn-camgr-server = "\${BRCMEXTERNAL-SRCPV-CMF}"
-EOF
-
 ### wpewebkit #######
 ## in meta-wpe, wpewebkit 2.22 was made new preferred version but now wpewebkit plugin does not start
 ## anymore in wpeframework. Forcing version 20170728 here again, until 2.22 working
@@ -142,9 +131,6 @@ sed -i '/DEFAULT_PREFERENCE/d' meta-wpe/recipes-wpe/wpewebkit/wpewebkit_20170728
 ###############
 
 ############# AAMP with OCDM #########
-## go to latest developments of aamp
-(cd rdk/components/generic/aamp; git checkout dev_sprint)
-(cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout dev_sprint)
 sed -i 's|^SRC_URI += "file://SWRDKV-1985|#SRC_URI += "file://SWRDKV-1985|' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/aamp/aamp_git.bbappend
 ## config for aamp
 cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/aamp_git.bbappend
