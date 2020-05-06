@@ -1,0 +1,22 @@
+Index: unified-16.4-generic-rdk-r0/BSEAV/lib/security/sage/manufacturing/app/Makefile
+===================================================================
+--- unified-16.4-generic-rdk-r0.orig/BSEAV/lib/security/sage/manufacturing/app/Makefile	2016-12-21 23:09:36.000000000 +0100
++++ unified-16.4-generic-rdk-r0/BSEAV/lib/security/sage/manufacturing/app/Makefile	2017-04-12 16:16:53.174637989 +0200
+@@ -97,7 +97,7 @@
+ 		${BSEAV_TOP}/lib/security/sage/manufacturing
+ 
+ #srai lib path first to get latest SRAI lib
+-LDFLAGS += -L${NEXUS_TOP}/bin/${NEXUS_PLATFORM} -lb_sage_manufacturing
++#LDFLAGS += -L${NEXUS_TOP}/bin/${NEXUS_PLATFORM} -lb_sage_manufacturing
+ LDFLAGS += -L${B_REFSW_OBJ_ROOT}/BSEAV/lib/security/sage/srai -lsrai
+ LDFLAGS += -L${NEXUS_BIN_DIR} -lnexus -lpthread
+ 
+@@ -121,7 +121,7 @@
+ # Implicit rule for building local apps
+ ${APP}: ${OBJS}
+ 	@echo [Link... $@]
+-	${Q_} ${CC} ${OBJS} -o ${APP} ${LDFLAGS}
++	${Q_} ${CC} ${OBJS} -o ${APP} -L${NEXUS_TOP}/bin/${NEXUS_PLATFORM} -lb_sage_manufacturing ${LDFLAGS}
+ 
+ %.o: %.c
+ 	@echo [Compile... $<]
