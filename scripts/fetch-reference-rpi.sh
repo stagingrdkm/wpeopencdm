@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 set -e
 
 ######### Build setup and repo sync
@@ -25,6 +24,7 @@ echo 'PACKAGECONFIG += "streamer"' >> meta-wpe/recipes-wpe/wpeframework/wpeframe
 ############# AAMP with OCDM #########
 ## get latest developments of aamp
 (cd rdk/components/generic/aamp; git checkout dev_sprint)
+(cd rdk/components/generic/aampabr; git checkout dev_sprint)
 (cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout dev_sprint)
 
 ## config for aamp
