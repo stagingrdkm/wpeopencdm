@@ -88,7 +88,7 @@ done
 
 ##### cherry picks
 ## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/4 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/5 && git cherry-pick FETCH_HEAD)
 
 ######### update checksums, LG specific!
 sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
@@ -107,9 +107,8 @@ rm meta-openembedded/meta-oe/recipes-devtools/protobuf/protobuf_3.7.0.bb
 sed -i 's#file://SWRDKV-1523.updating_buf_size_from_secbuf.patch;striplevel=1##'  meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
 sed -i 's#file://SWRDKV-1523.free_secbuf.patch;striplevel=1##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
 
-# OCDM plugins added by setting RDK_WITH_OPENCDM="y" before setup later in script
-# adding streamer manually
-echo 'PACKAGECONFIG += "streamer"' >> meta-wpe/recipes-wpe/wpeframework/wpeframework-plugins_git.bb 
+## prevent sed on UX.json which we don't have
+sed -i 's/sed -i/#sed -i/' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
 
 # do not disable rmfstreamer.service
 sed -i 's/^SYSTEMD_SERVICE_/#SYSTEMD_SERVICE_/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/mediastreamer/rmfstreamer_git.bbappend
@@ -131,6 +130,11 @@ sed -i '/DEFAULT_PREFERENCE/d' meta-wpe/recipes-wpe/wpewebkit/wpewebkit_20170728
 ###############
 
 ############# AAMP with OCDM #########
+## take recent specific version from dev_sprint branch insteadof tip
+(cd rdk/components/generic/aamp; git checkout c2272254dfdbabce8dfab44d3cbc10a7241502ff)
+(cd rdk/components/generic/aampabr; git checkout e320e4925ad207efd635388a7809aefbb21d8397)
+(cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout 37c6937182e13dae629e2fc3e5171ad4e1f31414)
+
 sed -i 's|^SRC_URI += "file://SWRDKV-1985|#SRC_URI += "file://SWRDKV-1985|' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/aamp/aamp_git.bbappend
 ## config for aamp
 cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/aamp_git.bbappend
@@ -139,8 +143,11 @@ EXTRA_OECMAKE += " -DCMAKE_CDM_DRM=1"
 EXTRA_OECMAKE += "\${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' -DCMAKE_SYSTEMD_JOURNAL=1', '', d)}"
 EXTRA_OECMAKE += " -DCMAKE_USE_THUNDER_OCDM_API_0_2=1"
 PACKAGECONFIG[opencdm] = "-DCMAKE_USE_OPENCDM=1,-DCMAKE_USE_OPENCDM=0,wpeframework"
+PACKAGECONFIG[playready] = "-DCMAKE_USE_PLAYREADY=1,-DCMAKE_USE_PLAYREADY=0,wpeframework"
+PACKAGECONFIG[widevine] = "-DCMAKE_USE_WIDEVINE=1,-DCMAKE_USE_WIDEVINE=0,wpeframework"
+PACKAGECONFIG[clearkey] = "-DCMAKE_USE_CLEARKEY=1,-DCMAKE_USE_CLEARKEY=0,wpeframework"
 PACKAGECONFIG[opencdm_adapter] = "-DCMAKE_USE_OPENCDM_ADAPTER=1,-DCMAKE_USE_OPENCDM_ADAPTER=0,wpeframework"
-PACKAGECONFIG_append = " opencdm_adapter"
+PACKAGECONFIG_append = " opencdm_adapter playready widevine clearkey"
 EOF
 cat <<EOF > meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/gst-plugins-rdk-aamp_git.bbappend
 PACKAGECONFIG[opencdm_adapter]  = "-DCMAKE_CDM_DRM=ON -DCMAKE_USE_OPENCDM_ADAPTER=ON,,"

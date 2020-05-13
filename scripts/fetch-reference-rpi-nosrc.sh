@@ -11,15 +11,11 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
 ## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/4 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/5 && git cherry-pick FETCH_HEAD)
 ## Add new machine raspberrypi-rdk-hybrid-generic
 (cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/47/37547/2 && git cherry-pick FETCH_HEAD)
 ## add refApp OVERRIDE check to externalsrc
 (cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/25/37525/1 && git cherry-pick FETCH_HEAD)
-
-# OCDM plugins added by setting RDK_WITH_OPENCDM="y" before setup later in script
-# adding streamer manually
-echo 'PACKAGECONFIG += "streamer"' >> meta-wpe/recipes-wpe/wpeframework/wpeframework-plugins_git.bb 
 
 ############# AAMP with OCDM #########
 ## get latest developments of aamp
@@ -29,9 +25,10 @@ git clone "https://code.rdkcentral.com/r/rdk/components/generic/aamp"
 git clone "https://code.rdkcentral.com/r/rdk/components/generic/aampabr"
 git clone "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp"
 cd -
-(cd rdk/components/generic/aamp; git checkout dev_sprint)
-(cd rdk/components/generic/aampabr; git checkout dev_sprint)
-(cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout dev_sprint)
+## take recent specific version from dev_sprint branch insteadof tip
+(cd rdk/components/generic/aamp; git checkout c2272254dfdbabce8dfab44d3cbc10a7241502ff)
+(cd rdk/components/generic/aampabr; git checkout e320e4925ad207efd635388a7809aefbb21d8397)
+(cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout 37c6937182e13dae629e2fc3e5171ad4e1f31414)
 
 ## config for aamp
 cat <<EOF >> meta-cmf-raspberrypi/recipes-extended/aamp/aamp_git.bbappend
@@ -40,10 +37,10 @@ EXTRA_OECMAKE += " -DCMAKE_CDM_DRM=1"
 EXTRA_OECMAKE += "\${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' -DCMAKE_SYSTEMD_JOURNAL=1', '', d)}"
 EXTRA_OECMAKE += " -DCMAKE_USE_THUNDER_OCDM_API_0_2=1"
 PACKAGECONFIG[opencdm] = "-DCMAKE_USE_OPENCDM=1,-DCMAKE_USE_OPENCDM=0,wpeframework"
+PACKAGECONFIG[clearkey] = "-DCMAKE_USE_CLEARKEY=1,-DCMAKE_USE_CLEARKEY=0,wpeframework"
 PACKAGECONFIG[opencdm_adapter] = "-DCMAKE_USE_OPENCDM_ADAPTER=1,-DCMAKE_USE_OPENCDM_ADAPTER=0,wpeframework"
-PACKAGECONFIG_append = " opencdm_adapter"
+PACKAGECONFIG_append = " opencdm_adapter clearkey"
 EOF
-
 cat <<EOF > meta-cmf-raspberrypi/recipes-extended/aamp/gst-plugins-rdk-aamp_git.bbappend
 PACKAGECONFIG[opencdm_adapter]  = "-DCMAKE_CDM_DRM=ON -DCMAKE_USE_OPENCDM_ADAPTER=ON,,"
 PACKAGECONFIG_append = " opencdm_adapter"
@@ -51,6 +48,12 @@ EOF
 ## fix unneeded and missing dep to sec_api (comcast)
 sed -i 's/-locdm -lsec_api"/-locdm"/' rdk/components/generic/gst-plugins-rdk-aamp/CMakeLists.txt
 ############
+
+## avoid sed on FirmwareControl.json which we don't include
+sed -i 's/sed -i/#sed -i/' meta-cmf-raspberrypi/recipes-wpe/wpeframework/wpeframework-plugins_git.bbappend
+
+## keep network management by systemd, we don't include wpeframework network plugin
+rm -f meta-wpe/recipes-core/systemd/systemd_%.bbappend
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
