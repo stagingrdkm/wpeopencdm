@@ -11,7 +11,7 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
 ## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/5 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/6 && git cherry-pick FETCH_HEAD)
 ## Add new machine raspberrypi-rdk-hybrid-generic
 (cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/47/37547/2 && git cherry-pick FETCH_HEAD)
 ## add refApp OVERRIDE check to externalsrc
@@ -29,6 +29,14 @@ cd -
 (cd rdk/components/generic/aamp; git checkout c2272254dfdbabce8dfab44d3cbc10a7241502ff)
 (cd rdk/components/generic/aampabr; git checkout e320e4925ad207efd635388a7809aefbb21d8397)
 (cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout 37c6937182e13dae629e2fc3e5171ad4e1f31414)
+
+## fix for servicemanager and Yajl 2.x
+mkdir -p meta-cmf-video-restricted/recipes-qt/servicemanager/files/
+(cd meta-cmf-video-restricted && git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git format-patch -1 --stdout FETCH_HEAD > recipes-qt/servicemanager/files/0001-yajl-2.patch)
+cat << EOF > meta-cmf-video-restricted/recipes-qt/servicemanager/servicemanager_git.bbappend
+FILESEXTRAPATHS_prepend := "\${THISDIR}/files:"
+SRC_URI += "file://0001-yajl-2.patch;patchdir=../.."
+EOF
 
 ## config for aamp
 cat <<EOF >> meta-cmf-raspberrypi/recipes-extended/aamp/aamp_git.bbappend

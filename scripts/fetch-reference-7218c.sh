@@ -88,7 +88,9 @@ done
 
 ##### cherry picks
 ## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/5 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/6 && git cherry-pick FETCH_HEAD)
+## fix for servicemanager and Yajl 2.x
+(cd rdk/components/generic/servicemanager;  git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git cherry-pick FETCH_HEAD)
 
 ######### update checksums, LG specific!
 sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
