@@ -12,11 +12,8 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 ##### cherry picks
 ## Create rdk-generic-reference-image
 (cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/11 && git cherry-pick FETCH_HEAD)
-## Add new machine raspberrypi-rdk-hybrid-generic
-(cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/47/37547/2 && git cherry-pick FETCH_HEAD)
 ## add refApp OVERRIDE check to externalsrc
 (cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/25/37525/1 && git cherry-pick FETCH_HEAD)
-
 
 ## re-enable ld-is-gold
 sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
@@ -60,9 +57,6 @@ EOF
 ## fix unneeded and missing dep to sec_api (comcast)
 sed -i 's/-locdm -lsec_api"/-locdm"/' rdk/components/generic/gst-plugins-rdk-aamp/CMakeLists.txt
 ############
-
-## avoid sed on FirmwareControl.json which we don't include
-sed -i 's/sed -i/#sed -i/' meta-cmf-raspberrypi/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
 
 ## keep network management by systemd, we don't include wpeframework network plugin
 rm -f meta-wpe/recipes-core/systemd/systemd_%.bbappend
