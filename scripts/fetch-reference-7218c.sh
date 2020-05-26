@@ -3,7 +3,7 @@ set -e
 
 TARGET_DIR_SUFFIX=""
 if [ -z "$1" ]; then
-  CONF_HW_REV="ne"
+  CONF_HW_REV="zb"
 else
   CONF_HW_REV="$1"
   TARGET_DIR_SUFFIX="_$CONF_HW_REV"
@@ -88,7 +88,7 @@ done
 
 ##### cherry picks
 ## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/6 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/11 && git cherry-pick FETCH_HEAD)
 ## fix for servicemanager and Yajl 2.x
 (cd rdk/components/generic/servicemanager;  git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git cherry-pick FETCH_HEAD)
 
@@ -105,31 +105,30 @@ sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad542
 ## prevent protobuf build problem: force usage of older 2.6.1
 rm meta-openembedded/meta-oe/recipes-devtools/protobuf/protobuf_3.7.0.bb
 
-## remove two merged patches
-sed -i 's#file://SWRDKV-1523.updating_buf_size_from_secbuf.patch;striplevel=1##'  meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
-sed -i 's#file://SWRDKV-1523.free_secbuf.patch;striplevel=1##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/gstreamer-plugins-soc/gstreamer-plugins-soc_opencdm.inc
+## re-enable ld-is-gold
+sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
+
+# XDG_RUNTIME_DIR is expected to be /run and not /run/user/0
+sed -i 's#/run/user/0#/run#g' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-graphics/westeros/files/westeros-launch.service
 
 ## prevent sed on UX.json which we don't have
 sed -i 's/sed -i/#sed -i/' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
+## prevent manual patch on compositor plugin config, we don't have
+sed -i 's#patch -p1 < ${WORKDIR}/SWRDKV-1987.wpeframework-plugins.rename_renderer.patch##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
+## remove patch that doesn't apply anymore
+sed -i 's#SRC_URI += "file://SWRDKV-2333.wpeframework-plugins.alexa.patch;striplevel=1"##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
 
-# do not disable rmfstreamer.service
-sed -i 's/^SYSTEMD_SERVICE_/#SYSTEMD_SERVICE_/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/mediastreamer/rmfstreamer_git.bbappend
+## remove patch that doesn't apply anymore
+sed -i 's#SRC_URI += "file://csp936606_disable_moca.patch;striplevel=0"##' meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-extended/xupnp/xupnp_git.bbappend
 
 # do not remove aampplayer-mpd-by-default.patch 
 sed -i 's/^SRC_URI_remove/#SRC_URI_remove/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/rdkmediaplayer/rdkmediaplayer.bbappend
 
+# do not remove westeros-launch.service
+sed -i 's/4\.0/IGNORE/g' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-graphics/westeros/westeros.bbappend
+
 # enable SWRDKV-2168.wpewebkit.eme_test_playready_keysystems.patch so that EME test 33 succeeds
 sed -i 's|#SRC_URI += "file://SWRDKV-2168|SRC_URI += "file://SWRDKV-2168|' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpewebkit/wpewebkit*.bbappend
-
-# to enable ocdm brcm adapter in wpeframework (broadcom_svp)
-echo 'DISTRO_FEATURES_append += " nexus_svp"' >>  meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/conf/opencdm.conf
-
-### wpewebkit #######
-## in meta-wpe, wpewebkit 2.22 was made new preferred version but now wpewebkit plugin does not start
-## anymore in wpeframework. Forcing version 20170728 here again, until 2.22 working
-echo 'DEFAULT_PREFERENCE = "-1"' >> meta-wpe/recipes-wpe/wpewebkit/wpewebkit_2.22.bb
-sed -i '/DEFAULT_PREFERENCE/d' meta-wpe/recipes-wpe/wpewebkit/wpewebkit_20170728.bb
-###############
 
 ############# AAMP with OCDM #########
 ## take recent specific version from dev_sprint branch insteadof tip
