@@ -10,10 +10,7 @@ repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-ne
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/11 && git cherry-pick FETCH_HEAD)
-## add refApp OVERRIDE check to externalsrc
-(cd meta-cmf; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf" refs/changes/25/37525/1 && git cherry-pick FETCH_HEAD)
+## none, except for special one later in script (Yajl 2.x)
 
 ## re-enable ld-is-gold
 sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc

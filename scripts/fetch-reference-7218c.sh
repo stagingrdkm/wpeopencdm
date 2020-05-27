@@ -87,8 +87,6 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-## Create rdk-generic-reference-image
-(cd meta-cmf-video-restricted;  git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/34/36834/11 && git cherry-pick FETCH_HEAD)
 ## fix for servicemanager and Yajl 2.x
 (cd rdk/components/generic/servicemanager;  git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git cherry-pick FETCH_HEAD)
 
@@ -126,6 +124,9 @@ sed -i 's/^SRC_URI_remove/#SRC_URI_remove/' meta-rdk-broadcom-generic-rdk/meta-b
 
 # do not remove westeros-launch.service
 sed -i 's/4\.0/IGNORE/g' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-graphics/westeros/westeros.bbappend
+
+# do not remove sessionmgr pkgconfig
+sed -i 's/^PACKAGECONFIG\[sessionmgr\]/#PACKAGECONFIG\[sessionmgr\]/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/mediastreamer/rmfstreamer_git.bbappend
 
 # enable SWRDKV-2168.wpewebkit.eme_test_playready_keysystems.patch so that EME test 33 succeeds
 sed -i 's|#SRC_URI += "file://SWRDKV-2168|SRC_URI += "file://SWRDKV-2168|' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpewebkit/wpewebkit*.bbappend
