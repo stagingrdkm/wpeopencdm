@@ -87,6 +87,13 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
+## update reference image dependencies
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/35/39435/1 && git cherry-pick FETCH_HEAD)
+## brcm layer fixes for reference image
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/34/39434/1 && git cherry-pick FETCH_HEAD)
+## fix to avoid linking with sec_api which we don't have
+(cd rdk/components/generic/gst-plugins-rdk-aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp" refs/changes/68/39468/1 && git cherry-pick FETCH_HEAD)
+
 ## fix for servicemanager and Yajl 2.x
 (cd rdk/components/generic/servicemanager;  git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git cherry-pick FETCH_HEAD)
 
@@ -100,43 +107,10 @@ sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad542
 sed -i 's/7eb654c171c383ab4a3b81f1a4f22f4b/7eb654c171c383ab4a3b81f1a4f22f4b/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
 sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
 
-## prevent protobuf build problem: force usage of older 2.6.1
-rm meta-openembedded/meta-oe/recipes-devtools/protobuf/protobuf_3.7.0.bb
-
 ## re-enable ld-is-gold
 sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
 
-# XDG_RUNTIME_DIR is expected to be /run and not /run/user/0
-sed -i 's#/run/user/0#/run#g' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-graphics/westeros/files/westeros-launch.service
-
-## prevent sed on UX.json which we don't have
-sed -i 's/sed -i/#sed -i/' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
-## prevent manual patch on compositor plugin config, we don't have
-sed -i 's#patch -p1 < ${WORKDIR}/SWRDKV-1987.wpeframework-plugins.rename_renderer.patch##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
-## remove patch that doesn't apply anymore
-sed -i 's#SRC_URI += "file://SWRDKV-2333.wpeframework-plugins.alexa.patch;striplevel=1"##' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpeframework/wpeframework-plugins_%.bbappend
-
-## remove patch that doesn't apply anymore
-sed -i 's#SRC_URI += "file://csp936606_disable_moca.patch;striplevel=0"##' meta-rdk-broadcom-generic-rdk/meta-brcm972180hbc/recipes-extended/xupnp/xupnp_git.bbappend
-
-# do not remove aampplayer-mpd-by-default.patch 
-sed -i 's/^SRC_URI_remove/#SRC_URI_remove/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/rdkmediaplayer/rdkmediaplayer.bbappend
-
-# do not remove westeros-launch.service
-sed -i 's/4\.0/IGNORE/g' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-graphics/westeros/westeros.bbappend
-
-# do not remove sessionmgr pkgconfig
-sed -i 's/^PACKAGECONFIG\[sessionmgr\]/#PACKAGECONFIG\[sessionmgr\]/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/mediastreamer/rmfstreamer_git.bbappend
-
-# enable SWRDKV-2168.wpewebkit.eme_test_playready_keysystems.patch so that EME test 33 succeeds
-sed -i 's|#SRC_URI += "file://SWRDKV-2168|SRC_URI += "file://SWRDKV-2168|' meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-wpe/wpewebkit/wpewebkit*.bbappend
-
 ############# AAMP with OCDM #########
-## take recent specific version from dev_sprint branch insteadof tip
-(cd rdk/components/generic/aamp; git checkout c2272254dfdbabce8dfab44d3cbc10a7241502ff)
-(cd rdk/components/generic/aampabr; git checkout e320e4925ad207efd635388a7809aefbb21d8397)
-(cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout 37c6937182e13dae629e2fc3e5171ad4e1f31414)
-
 sed -i 's|^SRC_URI += "file://SWRDKV-1985|#SRC_URI += "file://SWRDKV-1985|' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/aamp/aamp_git.bbappend
 ## config for aamp
 cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/aamp_git.bbappend
@@ -155,8 +129,6 @@ cat <<EOF > meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended
 PACKAGECONFIG[opencdm_adapter]  = "-DCMAKE_CDM_DRM=ON -DCMAKE_USE_OPENCDM_ADAPTER=ON,,"
 PACKAGECONFIG_append = " opencdm_adapter"
 EOF
-## fix unneeded and missing dep to sec_api (comcast)
-sed -i 's/-locdm -lsec_api"/-locdm"/' rdk/components/generic/gst-plugins-rdk-aamp/CMakeLists.txt
 ####################################
 
 ##### Add support for building brcm_manufacturing_tool

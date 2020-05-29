@@ -10,23 +10,10 @@ repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-ne
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-## none, except for special one later in script (Yajl 2.x)
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/35/39435/1 && git cherry-pick FETCH_HEAD)
 
 ## re-enable ld-is-gold
 sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
-
-############# AAMP with OCDM #########
-## get latest developments of aamp
-mkdir -p rdk/components/generic
-cd rdk/components/generic
-git clone "https://code.rdkcentral.com/r/rdk/components/generic/aamp"
-git clone "https://code.rdkcentral.com/r/rdk/components/generic/aampabr"
-git clone "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp"
-cd -
-## take recent specific version from dev_sprint branch insteadof tip
-(cd rdk/components/generic/aamp; git checkout c2272254dfdbabce8dfab44d3cbc10a7241502ff)
-(cd rdk/components/generic/aampabr; git checkout e320e4925ad207efd635388a7809aefbb21d8397)
-(cd rdk/components/generic/gst-plugins-rdk-aamp; git checkout 37c6937182e13dae629e2fc3e5171ad4e1f31414)
 
 ## fix for servicemanager and Yajl 2.x
 mkdir -p meta-cmf-video-restricted/recipes-qt/servicemanager/files/
@@ -35,6 +22,14 @@ cat << EOF > meta-cmf-video-restricted/recipes-qt/servicemanager/servicemanager_
 FILESEXTRAPATHS_prepend := "\${THISDIR}/files:"
 SRC_URI += "file://0001-yajl-2.patch;patchdir=../.."
 EOF
+
+############# AAMP with OCDM #########
+mkdir -p rdk/components/generic
+cd rdk/components/generic
+git clone "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp"
+cd -
+## fix to avoid linking with sec_api which we don't have
+(cd rdk/components/generic/gst-plugins-rdk-aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp" refs/changes/68/39468/1 && git cherry-pick FETCH_HEAD)
 
 ## config for aamp
 cat <<EOF >> meta-cmf-raspberrypi/recipes-extended/aamp/aamp_git.bbappend
@@ -51,8 +46,6 @@ cat <<EOF > meta-cmf-raspberrypi/recipes-extended/aamp/gst-plugins-rdk-aamp_git.
 PACKAGECONFIG[opencdm_adapter]  = "-DCMAKE_CDM_DRM=ON -DCMAKE_USE_OPENCDM_ADAPTER=ON,,"
 PACKAGECONFIG_append = " opencdm_adapter"
 EOF
-## fix unneeded and missing dep to sec_api (comcast)
-sed -i 's/-locdm -lsec_api"/-locdm"/' rdk/components/generic/gst-plugins-rdk-aamp/CMakeLists.txt
 ############
 
 ## keep network management by systemd, we don't include wpeframework network plugin
