@@ -87,10 +87,8 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-## update reference image dependencies
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/35/39435/1 && git cherry-pick FETCH_HEAD)
 ## brcm layer fixes for reference image
-(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/34/39434/1 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/34/39434/2 && git cherry-pick FETCH_HEAD)
 ## fix to avoid linking with sec_api which we don't have
 (cd rdk/components/generic/gst-plugins-rdk-aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp" refs/changes/68/39468/1 && git cherry-pick FETCH_HEAD)
 
