@@ -87,13 +87,7 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-## brcm layer fixes for reference image
-(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/34/39434/2 && git cherry-pick FETCH_HEAD)
-## fix to avoid linking with sec_api which we don't have
-(cd rdk/components/generic/gst-plugins-rdk-aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp" refs/changes/68/39468/1 && git cherry-pick FETCH_HEAD)
-
-## fix for servicemanager and Yajl 2.x
-(cd rdk/components/generic/servicemanager;  git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git cherry-pick FETCH_HEAD)
+## none at the moment
 
 ######### update checksums, LG specific!
 sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
