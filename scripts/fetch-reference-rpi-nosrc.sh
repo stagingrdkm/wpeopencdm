@@ -10,27 +10,12 @@ repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-ne
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-## none, except for special one later in script (Yajl 2.x)
+## none 
 
 ## re-enable ld-is-gold
 sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
 
-## fix for servicemanager and Yajl 2.x
-mkdir -p meta-cmf-video-restricted/recipes-qt/servicemanager/files/
-(cd meta-cmf-video-restricted && git fetch "https://code.rdkcentral.com/r/rdk/components/generic/servicemanager" refs/changes/23/38623/1 && git format-patch -1 --stdout FETCH_HEAD > recipes-qt/servicemanager/files/0001-yajl-2.patch)
-cat << EOF > meta-cmf-video-restricted/recipes-qt/servicemanager/servicemanager_git.bbappend
-FILESEXTRAPATHS_prepend := "\${THISDIR}/files:"
-SRC_URI += "file://0001-yajl-2.patch;patchdir=../.."
-EOF
-
 ############# AAMP with OCDM #########
-mkdir -p rdk/components/generic
-cd rdk/components/generic
-git clone "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp"
-cd -
-## fix to avoid linking with sec_api which we don't have
-(cd rdk/components/generic/gst-plugins-rdk-aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/gst-plugins-rdk-aamp" refs/changes/68/39468/1 && git cherry-pick FETCH_HEAD)
-
 ## config for aamp
 cat <<EOF >> meta-cmf-raspberrypi/recipes-extended/aamp/aamp_git.bbappend
 EXTRA_OECMAKE += " -DCMAKE_USE_RDK_PLUGINS=1"
