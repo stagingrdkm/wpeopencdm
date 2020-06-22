@@ -103,7 +103,6 @@ sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad542
 sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
 
 ############# AAMP with OCDM #########
-sed -i 's|^SRC_URI += "file://SWRDKV-1985|#SRC_URI += "file://SWRDKV-1985|' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-extended/aamp/aamp_git.bbappend
 ## config for aamp
 cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/aamp_git.bbappend
 EXTRA_OECMAKE += " -DCMAKE_USE_RDK_PLUGINS=1"
