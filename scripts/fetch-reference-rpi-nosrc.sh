@@ -10,8 +10,6 @@ repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-ne
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-# RDKCMF-8631 Fix browser apps on reference image
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/47/40447/1 && git cherry-pick FETCH_HEAD)
 
 ## RDKCMF-8631 Fix aamp not playing video on RPI
 mkdir -p rdk/components/generic
