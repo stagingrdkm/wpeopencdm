@@ -87,7 +87,20 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-## none at the moment
+## RDKCMF-8631 Fix aamp not playing video on RPI
+(cd rdk/components/generic/aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/aamp" refs/changes/39/40439/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 Add ocdm and playready packageconfigs for aamp
+(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/94/40594/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 Enable ocdm and playready packagecfgs for aamp in reference.inc
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/39/40639/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8640 Enable gold linker as default
+(cd meta-rdk; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk" refs/changes/87/38887/2 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 Support RDK_ENABLE_REFERENCE_IMAGE to enable reference image features
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/56/40756/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 Reference image fixes
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/55/40755/2 && git cherry-pick FETCH_HEAD)
+## BCMCZ-257 RDKCMF-8631 Some fixes to support reference image in brcm
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/66/40866/2 && git cherry-pick FETCH_HEAD)
 
 ######### update checksums, LG specific!
 sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
@@ -98,29 +111,6 @@ sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad542
  
 sed -i 's/7eb654c171c383ab4a3b81f1a4f22f4b/7eb654c171c383ab4a3b81f1a4f22f4b/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
 sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
-
-## re-enable ld-is-gold
-sed -i 's/DISTRO_FEATURES_remove_arm = "ld-is-gold"/#DISTRO_FEATURES_remove_arm = "ld-is-gold"/' meta-rdk/conf/distro/include/rdkv.inc
-
-############# AAMP with OCDM #########
-## config for aamp
-cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/aamp_git.bbappend
-EXTRA_OECMAKE += " -DCMAKE_USE_RDK_PLUGINS=1"
-EXTRA_OECMAKE += " -DCMAKE_CDM_DRM=1"
-EXTRA_OECMAKE += "\${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' -DCMAKE_SYSTEMD_JOURNAL=1', '', d)}"
-EXTRA_OECMAKE += " -DCMAKE_USE_THUNDER_OCDM_API_0_2=1"
-PACKAGECONFIG[opencdm] = "-DCMAKE_USE_OPENCDM=1,-DCMAKE_USE_OPENCDM=0,wpeframework"
-PACKAGECONFIG[playready] = "-DCMAKE_USE_PLAYREADY=1,-DCMAKE_USE_PLAYREADY=0,wpeframework"
-PACKAGECONFIG[widevine] = "-DCMAKE_USE_WIDEVINE=1,-DCMAKE_USE_WIDEVINE=0,wpeframework"
-PACKAGECONFIG[clearkey] = "-DCMAKE_USE_CLEARKEY=1,-DCMAKE_USE_CLEARKEY=0,wpeframework"
-PACKAGECONFIG[opencdm_adapter] = "-DCMAKE_USE_OPENCDM_ADAPTER=1,-DCMAKE_USE_OPENCDM_ADAPTER=0,wpeframework"
-PACKAGECONFIG_append = " opencdm_adapter playready widevine clearkey"
-EOF
-cat <<EOF > meta-rdk-broadcom-generic-rdk/meta-wpe-metrological/recipes-extended/aamp/gst-plugins-rdk-aamp_git.bbappend
-PACKAGECONFIG[opencdm_adapter]  = "-DCMAKE_CDM_DRM=ON -DCMAKE_USE_OPENCDM_ADAPTER=ON,,"
-PACKAGECONFIG_append = " opencdm_adapter"
-EOF
-####################################
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
@@ -225,12 +215,9 @@ declare -x RDK_USING_WESTEROS="y"
 declare -x RDK_WITH_RESTRICTED_COMPONENTS="n"
 declare -x RDK_ENABLE_WPE_METROLOGICAL="y"
 declare -x RDK_WITH_OPENCDM="y"
+declare -x RDK_ENABLE_REFERENCE_IMAGE="y"
  
 . ./meta-rdk-broadcom-generic-rdk/setup-environment-refboard-rdkv
-grep conf/local.conf -e "reference.inc" || echo "require conf/distro/include/reference.inc" >>  conf/local.conf
-
-echo 'SPLASH = ""' >> conf/local.conf
-echo 'IMAGE_FSTYPES += "ext2.gz"' >> conf/local.conf
 
 echo RUN FOLLOWING TO BUILD: bitbake rdk-generic-reference-image
 echo "PS1: you will need playready 3/4 key for playready encrypted content here: /home/root/playready3x.bin"
