@@ -91,22 +91,16 @@ done
 (cd rdk/components/generic/aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/aamp" refs/changes/39/40439/1 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8631 Add ocdm and playready packageconfigs for aamp
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/94/40594/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 Set REFSW_BROADCOM_3PIPS_NAME to 3pip_lgi
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/64/41064/1 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8640 Enable gold linker as default
 (cd meta-rdk; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk" refs/changes/87/38887/2 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8631 Support RDK_ENABLE_REFERENCE_IMAGE to enable reference image features
 (cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/56/40756/1 && git cherry-pick FETCH_HEAD)
 ## BCMCZ-257 RDKCMF-8631 Some fixes to support reference image in brcm
 (cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/66/40866/2 && git cherry-pick FETCH_HEAD)
-
-######### update checksums, LG specific!
-sed -i 's/38b81d1bad718bf8c3e937749935dbef/d1f8331d52356f4942d5df9214364455/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
-sed -i 's/11f0d0dede527c355db0459a1a4145e85a8571dab5a5a7628e35a6baa174352d/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
- 
-sed -i 's/7eb654c171c383ab4a3b81f1a4f22f4b/7eb654c171c383ab4a3b81f1a4f22f4b/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/broadcom-refsw_unified-19.2.1-generic-rdk.bb
-sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/broadcom-refsw_unified-19.2.1-generic-rdk.bb
- 
-sed -i 's/7eb654c171c383ab4a3b81f1a4f22f4b/7eb654c171c383ab4a3b81f1a4f22f4b/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
-sed -i 's/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/ad54233f648725820042b0dcc92a37a5b41c2562493852316861aa5cf130ff32/' meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-dtcp/dtcp_unified-19.2.1.bbappend
+## RDKCMF-8645 Add lgi 3pip hash and a way to use it
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/71/41071/1 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
@@ -194,7 +188,7 @@ cat <<EOF >> _build.sh
 declare -x MACHINE="brcm972180hbc-refboard"
 declare -x RDK_ENABLE_64BIT="n"
 declare -x RDK_ENABLE_AMAZON="n"
-declare -x RDK_ENABLE_BMON="n"
+declare -x RDK_ENABLE_BAS="n"
 declare -x RDK_ENABLE_BT_BLUEZ="n"
 declare -x RDK_ENABLE_BT_FLUORIDE="n"
 declare -x RDK_ENABLE_COBALT="n"
