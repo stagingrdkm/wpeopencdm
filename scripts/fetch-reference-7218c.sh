@@ -95,12 +95,10 @@ done
 (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/64/41064/1 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8640 Enable gold linker as default
 (cd meta-rdk; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk" refs/changes/87/38887/2 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8631 Support RDK_ENABLE_REFERENCE_IMAGE to enable reference image features
-(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/56/40756/1 && git cherry-pick FETCH_HEAD)
-## BCMCZ-257 RDKCMF-8631 Some fixes to support reference image in brcm
-(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/66/40866/2 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8645 Add lgi 3pip hash and a way to use it
 (cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/71/41071/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 reference image: mask brcm aamp bbappend
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/89/41289/1 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
