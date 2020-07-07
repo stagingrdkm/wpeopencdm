@@ -99,6 +99,8 @@ done
 (cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/71/41071/1 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8631 reference image: mask brcm aamp bbappend
 (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/89/41289/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 reference image: remove netsrvmgr dep from servicemanager
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/40/41340/1 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
