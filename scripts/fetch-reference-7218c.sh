@@ -91,16 +91,12 @@ done
 (cd rdk/components/generic/aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/aamp" refs/changes/39/40439/1 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8631 Add ocdm and playready packageconfigs for aamp
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/94/40594/1 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8631 Set REFSW_BROADCOM_3PIPS_NAME to 3pip_lgi
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/64/41064/1 && git cherry-pick FETCH_HEAD)
+## RDKCMF-8631 Set REFSW_3PIP_MD5/SHA256 hashes to LGI pip3 tarball
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/64/41064/2 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8640 Enable gold linker as default
 (cd meta-rdk; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk" refs/changes/87/38887/2 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8645 Add lgi 3pip hash and a way to use it
-(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/71/41071/1 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8631 reference image: mask brcm aamp bbappend
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/89/41289/1 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8631 reference image: remove netsrvmgr dep from servicemanager
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/40/41340/1 && git cherry-pick FETCH_HEAD)
+## BCMCZ-267 Add 3pip hash variables that can be overriden
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/11/41611/1 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
