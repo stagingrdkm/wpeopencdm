@@ -91,12 +91,8 @@ done
 (cd rdk/components/generic/aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/aamp" refs/changes/39/40439/1 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8631 Add ocdm and playready packageconfigs for aamp
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/94/40594/1 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8631 Set REFSW_3PIP_MD5/SHA256 hashes to LGI pip3 tarball
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/64/41064/2 && git cherry-pick FETCH_HEAD)
 ## RDKCMF-8640 Enable gold linker as default
 (cd meta-rdk; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk" refs/changes/87/38887/2 && git cherry-pick FETCH_HEAD)
-## BCMCZ-267 Add 3pip hash variables that can be overriden
-(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/11/41611/1 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
@@ -202,7 +198,9 @@ declare -x RDK_WITH_RESTRICTED_COMPONENTS="n"
 declare -x RDK_ENABLE_WPE_METROLOGICAL="y"
 declare -x RDK_WITH_OPENCDM="y"
 declare -x RDK_ENABLE_REFERENCE_IMAGE="y"
- 
+#declare -x REFSW_3PIP_MD5="d1f8331d52356f4942d5df9214364455"
+#declare -x REFSW_3PIP_SHA256="9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8"
+
 . ./meta-rdk-broadcom-generic-rdk/setup-environment-refboard-rdkv
 
 echo RUN FOLLOWING TO BUILD: bitbake rdk-generic-reference-image
