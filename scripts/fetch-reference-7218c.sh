@@ -39,10 +39,6 @@ fi
 repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
-mkdir rdkmanifests
-cp .repo/manifests/reference/auto.conf ./rdkmanifests/auto.conf
-cp .repo/manifests/reference/cmf_revision.txt ./rdkmanifests/cmf_revision.txt
-
 function download_file() {
     local from="$1"
     local to="$2"
