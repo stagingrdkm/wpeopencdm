@@ -12,8 +12,6 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 ##### cherry picks
 ## RDKCMF-8631 Add ocdm and playready packageconfigs for aamp
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/94/40594/1 && git cherry-pick FETCH_HEAD)
-## RDKCMF-8640 Enable gold linker as default
-(cd meta-rdk; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk" refs/changes/87/38887/2 && git cherry-pick FETCH_HEAD)
 
 ### switch to rdkservices ###
 (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/3 && git cherry-pick FETCH_HEAD)
