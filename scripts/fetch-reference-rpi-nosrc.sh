@@ -10,18 +10,7 @@ repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-ne
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-## RDKCMF-8631 Add ocdm and playready packageconfigs for aamp
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/94/40594/1 && git cherry-pick FETCH_HEAD)
-
-## RDKCMF-8631 Fix aamp not playing video on RPI
-mkdir -p rdk/components/generic
-cd rdk/components/generic
-git clone "https://code.rdkcentral.com/r/rdk/components/generic/aamp"
-cd -
-(cd rdk/components/generic/aamp; git fetch "https://code.rdkcentral.com/r/rdk/components/generic/aamp" refs/changes/39/40439/1 && git cherry-pick FETCH_HEAD)
-
-## keep network management by systemd, we don't include wpeframework network plugin
-rm -f meta-wpe/recipes-core/systemd/systemd_%.bbappend
+## none
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
