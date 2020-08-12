@@ -87,6 +87,8 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
+## BCMCZ-277 Fix wpeframework.service for reference image
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/17/42917/1 && git cherry-pick FETCH_HEAD)
 
 ### switch to rdkservices ###
 (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/4 && git cherry-pick FETCH_HEAD)

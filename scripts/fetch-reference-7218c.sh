@@ -83,7 +83,8 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-## none
+## BCMCZ-277 Fix wpeframework.service for reference image
+(cd meta-rdk-broadcom-generic-rdk; git fetch "https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next" refs/changes/17/42917/1 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
