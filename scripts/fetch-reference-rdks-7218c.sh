@@ -73,7 +73,6 @@ download_list=(
     #  - to: is either dst directory or dst path name
 
     "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201.tgz#downloads/"
-    "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200203-wlan_1_20_1.tgz#downloads/"
     "$TGZS_DIR/stblinux-4.9-1.15.tar.bz2#downloads/"
     "$TGZS_DIR/applibs_release_DirectFB_hal-1.7.6.src-2.1.tgz#downloads/"
     "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_19.2.1_20200201_3pip_broadcom.tgz"
@@ -89,7 +88,7 @@ done
 ##### cherry picks
 
 ### switch to rdkservices ###
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/6 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/8 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/9 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/13 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
