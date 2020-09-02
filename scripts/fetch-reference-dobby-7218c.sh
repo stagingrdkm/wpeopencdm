@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-TARGET_DIR_SUFFIX="_rdks"
+TARGET_DIR_SUFFIX="_dobby"
 if [ -z "$1" ]; then
   CONF_HW_REV="zb"
 else
@@ -92,7 +92,36 @@ done
 (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/9 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/13 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
-###
+##
+
+#### OCIContainer + Dobby
+## take newer rdkservices code that contains OCIContainer and RDKShell latest API
+(cd components/opensource/rdkservices; git checkout a6ae5d3713be9ee904eb6bfcaefe354d090680bf)
+sed -i 's/patch -p1/#patch -p1/g' meta-cmf-video/recipes-extended/rdkservices/rdkservices_git.bbappend
+# OCIContainer plugin
+echo 'BBMASK .= "|meta-cmf-video-restricted/recipes-containers/crun"' >> meta-cmf-video-restricted/conf/distro/include/reference.inc
+echo 'PACKAGECONFIG_append_pn-rdkservices = " ocicontainer"' >> meta-cmf-video-restricted/conf/distro/include/reference.inc
+echo 'PACKAGECONFIG[ocicontainer]  = "-DPLUGIN_OCICONTAINER=ON,-DPLUGIN_OCICONTAINER=OFF,dobby,dobby"' >> meta-rdk-video/recipes-extended/rdkservices/rdkservices_git.bb
+# RDKShell plugin
+echo 'PACKAGECONFIG_append_pn-rdkservices = " rdkshell"' >> meta-cmf-video-restricted/conf/distro/include/reference.inc
+# take latest recipes from comcast: dobby, crun, wpeframework and tools
+mkdir comcast
+cd comcast
+git clone https://gerrit.teamccp.com/rdk/yocto_oe/layers/meta-rdk-ext
+(cd meta-rdk-ext; git checkout 2006_sprint)
+git clone https://gerrit.teamccp.com/rdk/yocto_oe/layers/meta-rdk-video
+(cd meta-rdk-video; git checkout 2006_sprint)
+cd ..
+cp -rf comcast/meta-rdk-ext/recipes-containers/dobby meta-rdk-ext/recipes-containers/
+cp -rf comcast/meta-rdk-ext/recipes-containers/crun meta-rdk-ext/recipes-containers/
+cp -rf comcast/meta-rdk-ext/recipes-core/ctemplate meta-rdk-ext/recipes-core/
+cp -rf comcast/meta-rdk-ext/recipes-devtools/jsoncpp meta-rdk-ext/recipes-devtools/
+cp -rf comcast/meta-rdk-video/recipes-extended/rdkservices/wpeframework* meta-rdk-ext/recipes-extended/wpe-framework/
+rm meta-cmf/recipes-extended/wpe-framework/wpeframework_1.0.bbappend
+# switch back to port 9998 which is standard for rdkservices, needed for rdkshell
+sed -i 's/-DPORT=80//' meta-cmf-video-restricted/conf/distro/include/reference.inc
+# switch back to wayland-0 display for wpeframework services so we can start webbrowserplugin via rdkshell
+sed -i 's/wayland-wpe-0/wayland-0/' meta-cmf-video-restricted/recipes-core/images/rdk-generic-reference-image.bb
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
