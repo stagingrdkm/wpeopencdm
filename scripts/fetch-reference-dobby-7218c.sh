@@ -88,7 +88,7 @@ done
 ##### cherry picks
 
 ### switch to rdkservices ###
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/9 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/10 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/9 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/13 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
@@ -122,6 +122,18 @@ rm meta-cmf/recipes-extended/wpe-framework/wpeframework_1.0.bbappend
 sed -i 's/-DPORT=80//' meta-cmf-video-restricted/conf/distro/include/reference.inc
 # switch back to wayland-0 display for wpeframework services so we can start webbrowserplugin via rdkshell
 sed -i 's/wayland-wpe-0/wayland-0/' meta-cmf-video-restricted/recipes-core/images/rdk-generic-reference-image.bb
+
+### DACApplication plugin
+(rm -rf components/opensource/rdkservices; cd components/opensource; git clone git@github.com:sverkoye/rdkservices.git)
+echo 'PACKAGECONFIG[dacapplication]  = "-DPLUGIN_DACAPPLICATION=ON,-DPLUGIN_DACAPPLICATION=OFF,,"' >> meta-rdk-video/recipes-extended/rdkservices/rdkservices_git.bb
+echo 'PACKAGECONFIG_append_pn-rdkservices = " dacapplication"' >> meta-cmf-video-restricted/conf/distro/include/reference.inc
+cat <<EOF >> meta-cmf-video-restricted/recipes-extended/dac/dac_git.bb
+do_install_append() {
+   sed -i '/wayland/d' \${D}\${INSDIR}/platform/\${DAC_PLATFORM}/files.txt
+   sed -i 's/wayland-0/westeros/' \${D}\${INSDIR}/platform/\${DAC_PLATFORM}/env.txt
+   sed -i 's#/run#/tmp#' \${D}\${INSDIR}/platform/\${DAC_PLATFORM}/env.txt
+}
+EOF
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
