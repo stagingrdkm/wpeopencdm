@@ -13,7 +13,6 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ## lightning refapp2
 (cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/30/38330/27 && git cherry-pick FETCH_HEAD)
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/19/44319/3 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/80/40980/2 && git cherry-pick FETCH_HEAD)
 ###
 
