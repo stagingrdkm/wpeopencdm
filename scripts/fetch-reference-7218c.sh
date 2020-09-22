@@ -19,7 +19,7 @@ echo "(pass zb or ne as argument to change)"
 sleep 1
 
 ######### Edit directory below where to find 19.2 tarballs
-export TGZS_DIR=/data/rdk/19.2.1/
+export TGZS_DIR=/shared/rdk/19.2.1/
 #########
  
 ######### Build setup and repo sync
@@ -82,11 +82,6 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-
-## lightning refapp2
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/30/38330/29 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/80/40980/2 && git cherry-pick FETCH_HEAD)
-###
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
