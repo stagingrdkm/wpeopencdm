@@ -6,10 +6,15 @@ rm -rf rpi_reference_nosrc
 mkdir rpi_reference_nosrc
 cd rpi_reference_nosrc
 
-repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-next -m rdkv-nosrc.xml
+repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next-nosrc.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
+## none
+
+## temporary fixes
+## re-enable network
+sed -i '/network/d' meta-cmf-video-restricted/conf/distro/include/reference.inc
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
