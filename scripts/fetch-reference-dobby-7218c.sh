@@ -88,9 +88,9 @@ done
 ##### cherry picks
 
 ### switch to rdkservices ###
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/14 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/15 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/10 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/15 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/17 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
 ###
 
@@ -146,6 +146,8 @@ fixes_webkitbrowser() {
         fi
 }
 EOF
+# remove spark
+sed -i '/spark/d' meta-cmf-video-restricted/conf/distro/include/reference.inc
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw

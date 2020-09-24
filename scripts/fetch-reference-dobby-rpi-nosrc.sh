@@ -6,18 +6,18 @@ rm -rf rpi_reference_dobby_nosrc
 mkdir rpi_reference_dobby_nosrc
 cd rpi_reference_dobby_nosrc
 
-repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-next -m rdkv-nosrc.xml
+repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next-nosrc.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
 
 ### switch to rdkservices ###
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/14 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/15 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/10 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/15 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/17 && git cherry-pick FETCH_HEAD)
 (cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
 (cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/59/42159/5 && git cherry-pick FETCH_HEAD)
-(cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/57/42157/1 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/57/42157/2 && git cherry-pick FETCH_HEAD)
 ###
 
 #### OCIContainer + Dobby
@@ -73,6 +73,8 @@ fixes_webkitbrowser() {
         fi
 }
 EOF
+# remove spark
+sed -i '/spark/d' meta-cmf-video-restricted/conf/distro/include/reference.inc
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
