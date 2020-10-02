@@ -91,6 +91,24 @@ git clone git@github.com:sverkoye/meta-cmf-reference.git
 # force tip of forked rdkservices repo
 (rm -rf components/opensource/rdkservices; cd components/opensource; git clone git@github.com:sverkoye/rdkservices.git)
 
+##### Add support for building brcm_manufacturing_tool
+## use: bitbake -f -c manufacturing_tool broadcom-refsw
+## not put automatically in image: brcm_manufacturing_tool and libb_sage_manufacturing.so
+if [ -f ../patches/manufacturing-tool-compilation-fix.patch ]; then
+  cp ../patches/manufacturing-tool-compilation-fix.patch meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/broadcom-refsw-unified-19.2-generic-rdk/manufacturing-tool-compilation-fix.patch
+  cat <<EOF >> meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/recipes-bsp/broadcom-refsw/3pips/broadcom-refsw_unified-19.2.1-generic-rdk.bbappend
+SRC_URI += "file://manufacturing-tool-compilation-fix.patch"
+do_manufacturing_tool() {
+    export URSR_TOP=\${S}
+    export B_REFSW_OS=linuxuser
+    /bin/echo "Building manufacturing tool ..."
+    oe_runmake -C  \${WORKDIR}/BSEAV/lib/security/sage/manufacturing/app USE_NXCLIENT=y IMAGE_NAME=sage_ta_manufacturing.bin re
+}
+addtask do_manufacturing_tool
+EOF
+fi
+#####
+
 ####### copy missing files from LG layers - NE support. Drop this entire part in case you want ZB support.
 if [ "$CONF_HW_REV" == "ne" ]; then
   download_list_ne=(
