@@ -10,26 +10,12 @@ repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests 
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-
-### switch to rdkservices ###
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/15 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/10 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/17 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
-(cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/59/42159/5 && git cherry-pick FETCH_HEAD)
-(cd meta-cmf-raspberrypi; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-raspberrypi" refs/changes/57/42157/2 && git cherry-pick FETCH_HEAD)
-###
-
-## todo: fix port in browser.sh
+## none
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
-declare -x RDK_ENABLE_REFERENCE_IMAGE="y"
-. meta-cmf-raspberrypi/setup-environment
+. ./meta-cmf-video-reference-next/setup-environment
 
-echo "PS: use aamp-cli to test some streams (make sure to export AAMP_ENABLE_WESTEROS_SINK=1) :"
-echo "  CLEAR: http://amssamples.streaming.mediaservices.windows.net/683f7e47-bd83-4427-b0a3-26a6c4547782/BigBuckBunny.ism/manifest(format=mpd-time-csf)"
-echo RUN FOLLOWING TO BUILD: bitbake rdk-generic-reference-image
 EOF
 
 echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd rpi_reference_rdks_nosrc; source _build.sh"

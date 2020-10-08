@@ -86,15 +86,7 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-
-### switch to rdkservices ###
-(cd meta-cmf-video-restricted; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted" refs/changes/85/41785/15 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-ext; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-ext" refs/changes/89/41789/10 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/01/41801/17 && git cherry-pick FETCH_HEAD)
-(cd meta-rdk-video; git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-rdk-video" refs/changes/85/42385/5 && git cherry-pick FETCH_HEAD)
-###
-
-## todo: fix port in browser.sh
+## none
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
@@ -182,36 +174,8 @@ rm -rf meta-wpe
 cat <<EOF >> _build.sh
 ######### brcm972180hbc build
 declare -x MACHINE="brcm972180hbc-refboard"
-declare -x RDK_ENABLE_64BIT="n"
-declare -x RDK_ENABLE_AMAZON="n"
-declare -x RDK_ENABLE_BAS="n"
-declare -x RDK_ENABLE_BT_BLUEZ="n"
-declare -x RDK_ENABLE_BT_FLUORIDE="n"
-declare -x RDK_ENABLE_COBALT="n"
-declare -x RDK_ENABLE_DEBUG_BUILD="y"
-declare -x RDK_ENABLE_DTCP="n"
-declare -x RDK_ENABLE_DTCP_SAGE="n"
-declare -x RDK_ENABLE_NEXUS_USER_MODE="n"
-declare -x RDK_ENABLE_SSTATE_MIRRORS_MODE="n"
-declare -x RDK_ENABLE_SVP="y"
-declare -x RDK_FETCH_FROM_DMZ="n"
-declare -x RDK_URSR_VERSION="19.2.1"
-declare -x RDK_7218_VERSION="B0"
-declare -x RDK_USING_WESTEROS="y"
-declare -x RDK_WITH_RESTRICTED_COMPONENTS="n"
-declare -x RDK_ENABLE_WPE_METROLOGICAL="n"
-declare -x RDK_WITH_OPENCDM="y"
-declare -x RDK_ENABLE_REFERENCE_IMAGE="y"
-#declare -x REFSW_3PIP_MD5="d1f8331d52356f4942d5df9214364455"
-#declare -x REFSW_3PIP_SHA256="9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8"
+. ./meta-cmf-video-reference-next/setup-environment
 
-. ./meta-rdk-broadcom-generic-rdk/setup-environment-refboard-rdkv
-
-echo RUN FOLLOWING TO BUILD: bitbake rdk-generic-reference-image
-echo "PS1: you will need playready 3/4 key for playready encrypted content here: /home/root/playready3x.bin"
-echo "PS2: use aamp-cli to test some streams (make sure to export AAMP_ENABLE_WESTEROS_SINK=1) :"
-echo "  CLEAR: http://amssamples.streaming.mediaservices.windows.net/683f7e47-bd83-4427-b0a3-26a6c4547782/BigBuckBunny.ism/manifest(format=mpd-time-csf)"
-echo "  PLAYREADY: https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/mpds/11331.mpd"
 EOF
 
 echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_reference$TARGET_DIR_SUFFIX; source _build.sh"
