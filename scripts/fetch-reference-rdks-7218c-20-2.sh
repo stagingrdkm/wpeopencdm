@@ -118,9 +118,6 @@ sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d6065
 sed -i 's/19.2.1/20.2/' meta-cmf-video-reference/setup-environment
 sed -i '/20.2/a   declare -x RDK_7218_SECURE_PART="ZB_WITHOUT_REGION_VERIFICATION"' meta-cmf-video-reference/setup-environment
 
-echo 'SRC_URI += "file://0001-wpeframework-ocdm-playready-nexus-svp-20-2.patch"' >>  meta-cmf-video-reference-next/recipes-extended/rdkservices/wpeframework-ocdm-playready-nexus-svp_git.bb
-cp ../patches/0001-wpeframework-ocdm-playready-nexus-svp-20-2.patch meta-cmf-video-reference-next/recipes-extended/rdkservices/files/
-
 cat <<EOF >> _build.sh
 ######### brcm972180hbc build
 declare -x MACHINE="brcm972180hbc-refboard"
