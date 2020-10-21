@@ -68,6 +68,7 @@ download_list=(
     #  - from: is a src path
     #  - to: is either dst directory or dst path name
 
+    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005.zb.tgz#downloads/"
     "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005.tgz#downloads/"
     "$TGZS_DIR/stblinux-4.9-1.19.tar.bz2#downloads/"
     "$TGZS_DIR/applibs_release_DirectFB_hal-1.7.6.src-2.1.tgz#downloads/"
@@ -110,7 +111,9 @@ sed -i 's/d1f8331d52356f4942d5df9214364455/6ddc92c8a737e5f0c8ddd3bb1fc3b812/' me
 sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff/' meta-cmf-video-reference/conf/distro/include/reference.inc
 
 sed -i 's/19.2.1/20.2/' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x RDK_7218_SECURE_PART="ZB_WITHOUT_REGION_VERIFICATION"' meta-cmf-video-reference/setup-environment
+sed -i '/20.2/a   declare -x RDK_7218_SECURE_PART="ZB_REGION_VERIFICATION"' meta-cmf-video-reference/setup-environment
+sed -i '/20.2/a   declare -x ZBDSP_MD5="9dc5071d062d307e19c3295259f42e91"' meta-cmf-video-reference/setup-environment
+sed -i '/20.2/a   declare -x ZBDSP_SHA256="bf65d4bf805af501a083da736d93c4ae3d0347078b6174f75575493235b6941a"' meta-cmf-video-reference/setup-environment
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="brcm972180hbc-refboard"
