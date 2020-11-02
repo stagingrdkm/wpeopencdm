@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-TARGET_DIR_SUFFIX="_rdks"
+TARGET_DIR_SUFFIX="_next"
 if [ -z "$1" ]; then
   CONF_HW_REV="zb"
 else

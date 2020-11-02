@@ -2,9 +2,9 @@
 set -e
 
 ######### Build setup and repo sync
-rm -rf rpi_reference_rdks_nosrc
-mkdir rpi_reference_rdks_nosrc
-cd rpi_reference_rdks_nosrc
+rm -rf rpi_reference_next_nosrc
+mkdir rpi_reference_next_nosrc
+cd rpi_reference_next_nosrc
 
 repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next-nosrc.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
@@ -18,4 +18,4 @@ declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
 
 EOF
 
-echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd rpi_reference_rdks_nosrc; source _build.sh"
+echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd rpi_reference_next_nosrc; source _build.sh"
