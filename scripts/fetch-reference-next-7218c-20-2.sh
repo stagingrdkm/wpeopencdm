@@ -2,21 +2,6 @@
 set -e
 
 TARGET_DIR_SUFFIX="_next"
-if [ -z "$1" ]; then
-  CONF_HW_REV="zb"
-else
-  CONF_HW_REV="$1"
-  TARGET_DIR_SUFFIX="${TARGET_DIR_SUFFIX}_$CONF_HW_REV"
-fi
-
-if [ "$CONF_HW_REV" != "ne" ] && [ "$CONF_HW_REV" != "zb" ]; then
-  echo "Unsupported CONF_HW_REV: $CONF_HW_REV"
-  exit
-fi
-
-echo "***** SETTING UP for HW_REV = $CONF_HW_REV *****"
-echo "(pass zb or ne as argument to change)"
-sleep 1
 
 ######### Edit directory below where to find 19.2 tarballs
 export TGZS_DIR=/shared/rdk/20.2/
