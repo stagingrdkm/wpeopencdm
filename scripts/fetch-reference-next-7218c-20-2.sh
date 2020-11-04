@@ -92,8 +92,6 @@ EOF
 fi
 #####
 
-rm -rf meta-wpe
-
 # fix 20.2 hashes
 sed -i 's/d1f8331d52356f4942d5df9214364455/6ddc92c8a737e5f0c8ddd3bb1fc3b812/' meta-cmf-video-reference-next/conf/distro/include/reference.inc
 sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff/' meta-cmf-video-reference-next/conf/distro/include/reference.inc

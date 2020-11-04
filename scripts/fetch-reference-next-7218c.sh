@@ -91,8 +91,6 @@ EOF
 fi
 #####
 
-rm -rf meta-wpe
-
 cat <<EOF >> _build.sh
 ######### brcm972180hbc build
 declare -x MACHINE="brcm972180hbc-refboard"

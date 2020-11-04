@@ -12,10 +12,6 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 ##### cherry picks
 ## none
 
-## temporary fixes
-## re-enable network
-sed -i '/network/d' meta-cmf-video-reference/conf/distro/include/reference.inc
-
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
 . meta-cmf-video-reference/setup-environment
