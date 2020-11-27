@@ -6,7 +6,7 @@ rm -rf rpi_reference_nosrc
 mkdir rpi_reference_nosrc
 cd rpi_reference_nosrc
 
-repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next-nosrc.xml
+repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk-next -m rdkv-nosrc.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
