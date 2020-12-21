@@ -2,6 +2,10 @@
 set -e
 
 TARGET_DIR_SUFFIX="_next"
+if [ ! -z "$NETFLIX" ]; then
+    echo "NETFLIX BUILD !!"
+    TARGET_DIR_SUFFIX="_netflix_next"
+fi
 
 ######### Edit directory below where to find 19.2 tarballs
 export TGZS_DIR=/shared/rdk/20.2/
@@ -27,6 +31,15 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 mkdir rdkmanifests
 cp .repo/manifests/reference/auto.conf ./rdkmanifests/auto.conf
 cp .repo/manifests/reference/cmf_revision.txt ./rdkmanifests/cmf_revision.txt
+
+if [ ! -z "$NETFLIX" ]; then
+    # add extra netflix repos
+    git clone "https://code.rdkcentral.com/r/apps/netflix/rdk-oe/meta-rdk-netflix"
+    mkdir apps/netflix/ -p
+    (cd apps/netflix/ && git clone "https://code.rdkcentral.com/r/apps/netflix/netflix-plugin")
+    (cd apps/netflix/ && git clone "https://code.rdkcentral.com/r/apps/netflix/netflix-5.1.1")
+    (cd apps/netflix/ && git clone "https://code.rdkcentral.com/r/apps/netflix/netflix-5.3.1")
+fi
 
 function download_file() {
     local from="$1"
@@ -63,6 +76,10 @@ download_list=(
     "$TGZS_DIR/applibs_release_DirectFB_hal-1.7.6.src-2.1.tgz#downloads/"
     "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_20.2_20201005_3pips_broadcom.tgz"
 )
+if [ ! -z "$NETFLIX" ]; then
+    download_list+=("$TGZS_DIR/nrd-5.1.1-1340856.tar.gz#downloads/"
+                    "$TGZS_DIR/nrd-5.3.1-27d5e9003f.tar.gz#downloads/")
+fi
 
 for i in ${download_list[@]}; do
     IFS='#' read -a args <<< $i
@@ -72,7 +89,10 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-## none
+if [ ! -z "$NETFLIX" ]; then
+    # netflix integration commit
+    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/3 && git cherry-pick FETCH_HEAD)
+fi
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
