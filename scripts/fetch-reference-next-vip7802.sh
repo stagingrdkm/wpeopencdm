@@ -33,7 +33,7 @@ sed -i 's/wget/#wget/' meta-rdk-oem-comm-bcm-accel/meta-vip7802/setup-environmen
 git clone "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference"
 git clone "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next"
 # add fix for vip7802 support
-(cd meta-cmf-video-reference && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference" refs/changes/54/49754/2 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-reference && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference" refs/changes/54/49754/4 && git cherry-pick FETCH_HEAD)
 
 # re-enable servicemanager + rmfstreamer
 sed -i 's/\(.*servicemanager_git.bb.*\)/#\1/' meta-rdk-oem-comm-bcm-accel/meta-vip7802/conf/machine/vip7802.conf
@@ -43,8 +43,11 @@ sed -i 's/\(.*rmfstreamer_git.bb.*\)/#\1/' meta-rdk-oem-comm-bcm-accel/meta-vip7
 sed -i 's/gstqamtunersrc-brcm//' meta-cmf-video-reference/recipes-core/images/rdk-generic-reference-image.bb
 sed -i 's/gstqamtunersrc//' meta-cmf-video-reference/recipes-core/images/rdk-generic-reference-image.bb
 
-# todo: disable package because it introduced compile error
-sed -i 's/^\(PACKAGECONFIG_append_pn-rdkservices = " packager"\)/#\1/' meta-cmf-video-reference-next/conf/distro/include/reference.inc 
+##### cherry picks
+if [ ! -z "$NETFLIX" ]; then
+    # netflix integration commit
+    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/4 && git cherry-pick FETCH_HEAD)
+fi
 
 # add pkg.tar.gz support in rdk-generic-reference-image
 cat<<EOF >> meta-cmf-video-reference-next/recipes-core/images/rdk-generic-reference-image.bbappend
@@ -121,12 +124,6 @@ for i in ${download_list[@]}; do
     to=${args[1]}
     download_file "${from}" "${to}"
 done
-
-##### cherry picks
-if [ ! -z "$NETFLIX" ]; then
-    # netflix integration commit
-    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/3 && git cherry-pick FETCH_HEAD)
-fi
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
