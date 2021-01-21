@@ -25,23 +25,14 @@ fi
 
 [ -d downloads ] || mkdir -p downloads
 
-repo init -u https://code.rdkcentral.com/r/collaboration/oem/commscope/comm-bcm-accel-manifests -b rdk-next -m vip7802.xml
-repo sync --no-tags -c --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
-sed -i 's/wget/#wget/' meta-rdk-oem-comm-bcm-accel/meta-vip7802/setup-environment-arris-generic-rdkv
+repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next-commscope.xml
+repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
-# clone the reference layers
-git clone "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference"
-git clone "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next"
-# add fix for vip7802 support
-(cd meta-cmf-video-reference && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference" refs/changes/54/49754/4 && git cherry-pick FETCH_HEAD)
-
-# re-enable servicemanager + rmfstreamer
+# some fixes to vip7802 machine config to support reference image build
 sed -i 's/\(.*servicemanager_git.bb.*\)/#\1/' meta-rdk-oem-comm-bcm-accel/meta-vip7802/conf/machine/vip7802.conf
 sed -i 's/\(.*rmfstreamer_git.bb.*\)/#\1/' meta-rdk-oem-comm-bcm-accel/meta-vip7802/conf/machine/vip7802.conf
-
-# disable gstqamtunersrc
-sed -i 's/gstqamtunersrc-brcm//' meta-cmf-video-reference/recipes-core/images/rdk-generic-reference-image.bb
-sed -i 's/gstqamtunersrc//' meta-cmf-video-reference/recipes-core/images/rdk-generic-reference-image.bb
+sed -i 's/RDK_KERNEL_VERSION/KERNEL_VERSION/' meta-rdk-oem-comm-bcm-accel/meta-vip7802/conf/machine/vip7802.conf
+sed -i 's#meta-rdk-oem-comm-bcm-accel//meta-vip7802#meta-rdk-oem-comm-bcm-accel/meta-vip7802#' meta-rdk-oem-comm-bcm-accel/meta-vip7802/conf/machine/vip7802.conf
 
 ##### cherry picks
 if [ ! -z "$NETFLIX" ]; then
@@ -50,7 +41,7 @@ if [ ! -z "$NETFLIX" ]; then
 fi
 
 # add pkg.tar.gz support in rdk-generic-reference-image
-cat<<EOF >> meta-cmf-video-reference-next/recipes-core/images/rdk-generic-reference-image.bbappend
+cat<<EOF >> meta-cmf-video-reference/recipes-core/images/rdk-generic-reference-image.bb
 addtask do_create_pkg after do_image_complete before do_image_qa
 do_create_pkg () {
     TARGET=rdk-generic-reference
@@ -61,7 +52,6 @@ do_create_pkg () {
     PKG_TARBALL=\${IMG_NAME}.pkg.tar.gz
     cd \${DEPLOY_DIR_IMAGE}
     SHASUM=tar_sha256sum
-
     sha256sum \${ROOTFS} \${KERNEL} > \${SHASUM}
     tar -zcf \${PKG_TARBALL} \${ROOTFS} \${KERNEL} \${SHASUM}
     ln -sf \${PKG_TARBALL} \${TARGET}-\${BOARD}.pkg.tar.gz
@@ -144,7 +134,6 @@ fi
 #####
 
 cat <<EOF >> _build.sh
-######### vip7802 build
 declare -x MACHINE="vip7802"
 . ./meta-cmf-video-reference-next/setup-environment
 EOF
