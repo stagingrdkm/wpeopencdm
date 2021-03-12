@@ -37,7 +37,7 @@ sed -i 's#meta-rdk-oem-comm-bcm-accel//meta-vip7802#meta-rdk-oem-comm-bcm-accel/
 ##### cherry picks
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
-    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/4 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
 fi
 
 # add pkg.tar.gz support in rdk-generic-reference-image
