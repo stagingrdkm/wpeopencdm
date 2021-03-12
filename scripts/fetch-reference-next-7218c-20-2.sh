@@ -91,7 +91,7 @@ done
 ##### cherry picks
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
-    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/3 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
 fi
 
 ##### Add support for building brcm_manufacturing_tool
