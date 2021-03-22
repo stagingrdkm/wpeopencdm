@@ -10,10 +10,13 @@ repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b dunfel
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 ##### cherry picks
-(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/87/54287/1 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/87/54287/3 && git cherry-pick FETCH_HEAD)
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="raspberrypi-rdk-hybrid-generic"
+
+[ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
+
 . meta-cmf-video-reference/setup-environment
 EOF
 
