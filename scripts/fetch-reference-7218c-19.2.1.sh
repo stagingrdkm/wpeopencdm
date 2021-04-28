@@ -1,15 +1,15 @@
 #!/bin/bash
 set -e
 
-TARGET_DIR_SUFFIX=""
+TARGET_DIR_SUFFIX="_19_2_1"
 ######### Edit directory below where to find 19.2 tarballs
-export TGZS_DIR=/shared/rdk/20.2/
+export TGZS_DIR=/shared/rdk/19.2.1/
 #########
  
 ######### Build setup and repo sync
-rm -rf 7218c_reference_20_2$TARGET_DIR_SUFFIX
-mkdir 7218c_reference_20_2$TARGET_DIR_SUFFIX
-cd 7218c_reference_20_2$TARGET_DIR_SUFFIX
+rm -rf 7218c_reference$TARGET_DIR_SUFFIX
+mkdir 7218c_reference$TARGET_DIR_SUFFIX
+cd 7218c_reference$TARGET_DIR_SUFFIX
 
 if [ -n "$(find "../../downloads" -maxdepth 2 -type d -empty 2>/dev/null)" ]; then
     rm -rf downloads
@@ -52,11 +52,10 @@ download_list=(
     #  - from: is a src path
     #  - to: is either dst directory or dst path name
 
-    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005.zb.tgz#downloads/"
-    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005.tgz#downloads/"
-    "$TGZS_DIR/stblinux-4.9-1.19.tar.bz2#downloads/"
+    "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201.tgz#downloads/"
+    "$TGZS_DIR/stblinux-4.9-1.15.tar.bz2#downloads/"
     "$TGZS_DIR/applibs_release_DirectFB_hal-1.7.6.src-2.1.tgz#downloads/"
-    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_20.2_20201005_3pips_broadcom.tgz"
+    "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_19.2.1_20200201_3pip_broadcom.tgz"
 )
 
 for i in ${download_list[@]}; do
@@ -87,21 +86,12 @@ EOF
 fi
 #####
 
-# fix 20.2 hashes
-sed -i 's/d1f8331d52356f4942d5df9214364455/6ddc92c8a737e5f0c8ddd3bb1fc3b812/' meta-cmf-video-reference-next/conf/distro/include/reference.inc
-sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff/' meta-cmf-video-reference-next/conf/distro/include/reference.inc
-
-sed -i 's/d1f8331d52356f4942d5df9214364455/6ddc92c8a737e5f0c8ddd3bb1fc3b812/' meta-cmf-video-reference/conf/distro/include/reference.inc
-sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff/' meta-cmf-video-reference/conf/distro/include/reference.inc
-
-sed -i 's/19.2.1/20.2/' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x RDK_7218_SECURE_PART="ZB_REGION_VERIFICATION"' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x ZBDSP_MD5="9dc5071d062d307e19c3295259f42e91"' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x ZBDSP_SHA256="bf65d4bf805af501a083da736d93c4ae3d0347078b6174f75575493235b6941a"' meta-cmf-video-reference/setup-environment
-
 cat <<EOF >> _build.sh
 declare -x MACHINE="brcm972180hbc-refboard"
+declare -x RDK_URSR_VERSION="19.2.1"
+declare -x REFSW_3PIP_MD5="d1f8331d52356f4942d5df9214364455"
+declare -x REFSW_3PIP_SHA256="9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8"
 . ./meta-cmf-video-reference/setup-environment
 EOF
 
-echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_reference_20_2$TARGET_DIR_SUFFIX; source _build.sh"
+echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd 7218c_reference$TARGET_DIR_SUFFIX; source _build.sh"

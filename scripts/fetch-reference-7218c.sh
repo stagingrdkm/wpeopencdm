@@ -3,7 +3,7 @@ set -e
 
 TARGET_DIR_SUFFIX=""
 ######### Edit directory below where to find 19.2 tarballs
-export TGZS_DIR=/shared/rdk/19.2.1/
+export TGZS_DIR=/shared/rdk/20.2/
 #########
  
 ######### Build setup and repo sync
@@ -52,10 +52,11 @@ download_list=(
     #  - from: is a src path
     #  - to: is either dst directory or dst path name
 
-    "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201.tgz#downloads/"
-    "$TGZS_DIR/stblinux-4.9-1.15.tar.bz2#downloads/"
+    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005.zb.tgz#downloads/"
+    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005.tgz#downloads/"
+    "$TGZS_DIR/stblinux-4.9-1.19.tar.bz2#downloads/"
     "$TGZS_DIR/applibs_release_DirectFB_hal-1.7.6.src-2.1.tgz#downloads/"
-    "$TGZS_DIR/refsw_release_unified_URSR_19.2.1_20200201_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_19.2.1_20200201_3pip_broadcom.tgz"
+    "$TGZS_DIR/refsw_release_unified_URSR_20.2_20201005_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_20.2_20201005_3pips_broadcom.tgz"
 )
 
 for i in ${download_list[@]}; do
@@ -88,6 +89,11 @@ fi
 
 cat <<EOF >> _build.sh
 declare -x MACHINE="brcm972180hbc-refboard"
+declare -x RDK_URSR_VERSION="20.2"
+declare -x REFSW_3PIP_MD5="6ddc92c8a737e5f0c8ddd3bb1fc3b812"
+declare -x REFSW_3PIP_SHA256="d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff"
+declare -x ZBDSP_MD5="9dc5071d062d307e19c3295259f42e91"
+declare -x ZBDSP_SHA256="bf65d4bf805af501a083da736d93c4ae3d0347078b6174f75575493235b6941a"
 . ./meta-cmf-video-reference/setup-environment
 EOF
 
