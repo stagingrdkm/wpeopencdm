@@ -95,8 +95,6 @@ if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
     (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
 fi
-(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/87/54287/3 && git cherry-pick FETCH_HEAD)
-(cd meta-cmf-video-reference-next && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next refs/changes/88/54288/4 && git cherry-pick FETCH_HEAD)
 
 ##### Add support for building brcm_manufacturing_tool
 ## use: bitbake -f -c manufacturing_tool broadcom-refsw
@@ -116,21 +114,14 @@ EOF
 fi
 #####
 
-# fix 20.2 hashes
-sed -i 's/d1f8331d52356f4942d5df9214364455/6ddc92c8a737e5f0c8ddd3bb1fc3b812/' meta-cmf-video-reference-next/conf/distro/include/reference.inc
-sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff/' meta-cmf-video-reference-next/conf/distro/include/reference.inc
-
-sed -i 's/d1f8331d52356f4942d5df9214364455/6ddc92c8a737e5f0c8ddd3bb1fc3b812/' meta-cmf-video-reference/conf/distro/include/reference.inc
-sed -i 's/9b45a8edd2a883e73e38d39ce97e5c490b7c169d4549c6d8e53424bc2536e1b8/d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff/' meta-cmf-video-reference/conf/distro/include/reference.inc
-
-sed -i 's/19.2.1/20.2/' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x RDK_7218_SECURE_PART="ZB_REGION_VERIFICATION"' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x ZBDSP_MD5="9dc5071d062d307e19c3295259f42e91"' meta-cmf-video-reference/setup-environment
-sed -i '/20.2/a   declare -x ZBDSP_SHA256="bf65d4bf805af501a083da736d93c4ae3d0347078b6174f75575493235b6941a"' meta-cmf-video-reference/setup-environment
-
 cat <<EOF >> _build.sh
 ######### brcm972180hbc build
 declare -x MACHINE="brcm972180hbc-refboard"
+declare -x RDK_URSR_VERSION="20.2"
+declare -x REFSW_3PIP_MD5="6ddc92c8a737e5f0c8ddd3bb1fc3b812"
+declare -x REFSW_3PIP_SHA256="d60650ec4be7ac6e8d9bf1de243972251bdbc9ba37df38d586835242a8058fff"
+declare -x ZBDSP_MD5="9dc5071d062d307e19c3295259f42e91"
+declare -x ZBDSP_SHA256="bf65d4bf805af501a083da736d93c4ae3d0347078b6174f75575493235b6941a"
 
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
 
