@@ -25,9 +25,7 @@ fi
 
 [ -d downloads ] || mkdir -p downloads
 
-repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next.xml
-(cd .repo/manifests/ && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests refs/changes/46/54646/2 && git cherry-pick FETCH_HEAD)
-sed -i 's/manifest-next.xml/manifest-next-dunfell.xml/' .repo/manifest.xml
+repo init -u https://code.rdkcentral.com/r/collaboration/soc/broadcom/manifests -m reference/manifest-next-dunfell.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 mkdir rdkmanifests
