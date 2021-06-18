@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+TARGET_DIR_SUFFIX=""
  
 ######### Build setup and repo sync
 rm -rf hp44h_reference_next$TARGET_DIR_SUFFIX
