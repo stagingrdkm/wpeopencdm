@@ -42,10 +42,7 @@ sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove
 
 ##### cherry picks
 cd meta-amlogic
-git fetch https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers/meta-amlogic refs/changes/39/57939/1 && git cherry-pick FETCH_HEAD
-cd -
-cd meta-cmf-video-reference
-git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/24/58424/3 && git cherry-pick FETCH_HEAD
+git fetch https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers/meta-amlogic refs/changes/39/57939/2 && git cherry-pick FETCH_HEAD
 cd -
 
 cat <<EOF >> _build.sh
