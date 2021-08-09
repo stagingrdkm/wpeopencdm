@@ -25,14 +25,7 @@ checkout_repo "ssh://dev.caldero.com:29418" "meta-rdk-skyworth-hx4x" rdk-next
 checkout_repo "https://code.rdkcentral.com/r/collaboration/oem/skyworth/yocto_oe/layers" "meta-rdk-oem-skyworth-aml905X2" sc2-rdkservices
 
 ## avoid removal of clearkey DISTRO feature
-sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove = "compositor"#' meta-rdk-bsp-amlogic/conf/machine/include/amlogic_32b.inc
-
-cd meta-cmf-video-reference
-git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/08/60508/2 && git cherry-pick FETCH_HEAD
-cd -
-cd meta-cmf-video-reference-next
-git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next refs/changes/75/60675/1 && git cherry-pick FETCH_HEAD
-cd -
+sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove = "compositor"#' meta-rdk-bsp-amlogic/conf/machine/include/amlogic*.inc
 
 cat <<EOF >> _build.sh
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
