@@ -24,6 +24,9 @@ repo sync --no-clone-bundle -j12
 checkout_repo "ssh://dev.caldero.com:29418" "meta-rdk-skyworth-hx4x" rdk-next
 checkout_repo "https://code.rdkcentral.com/r/collaboration/oem/skyworth/yocto_oe/layers" "meta-rdk-oem-skyworth-aml905X2" sc2-rdkservices
 
+## Fix some manifest versions, we need newer sources
+checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference fa025eccfffeff2ebfeb449554ba4010bd5b2efd
+
 ## avoid removal of clearkey DISTRO feature
 sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove = "compositor"#' meta-rdk-bsp-amlogic/conf/machine/include/amlogic*.inc
 
