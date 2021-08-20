@@ -25,11 +25,16 @@ checkout_repo "ssh://dev.caldero.com:29418" "meta-rdk-skyworth-hx4x" rdk-next
 checkout_repo "https://code.rdkcentral.com/r/collaboration/oem/skyworth/yocto_oe/layers" "meta-rdk-oem-skyworth-aml905X2" sc2-rdkservices
 
 ## Fix some manifest versions, we need newer sources
-checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference 73a705405cbb4bce15175d55d9210dddcee980eb
-checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference-next e6975d49907c099b4d11430e4902c64449bade5f
+checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference ee0cdb748d1f2c29f951e54bba31988a8cc4c889
+checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference-next 7fdb2fb658949af97adae9dc8f8bdab4edea1fd4
 
 ## avoid removal of clearkey DISTRO feature
 sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove = "compositor"#' meta-rdk-bsp-amlogic/conf/machine/include/amlogic*.inc
+
+## cherry picks
+cd meta-cmf-video-reference
+git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/78/61078/2 && git cherry-pick FETCH_HEAD
+cd -
 
 cat <<EOF >> _build.sh
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
