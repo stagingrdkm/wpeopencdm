@@ -16,20 +16,19 @@ checkout_repo() {
   cd -
 }
 
-repo init -u https://code.rdkcentral.com/r/collaboration/soc/amlogic/aml-accel-manifests -b rdk-next -m rdk-firebolt-dunfell-ref-sc2-k54.xml
+repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b dunfell -m rdkv-nosrc.xml
 repo sync --no-clone-bundle -j12
 
-## clone repos not yet in manifest
-########## Skyworth sources ######################################
-checkout_repo "ssh://dev.caldero.com:29418" "meta-rdk-skyworth-hx4x" rdk-next
-checkout_repo "https://code.rdkcentral.com/r/collaboration/oem/skyworth/yocto_oe/layers" "meta-rdk-oem-skyworth-aml905X2" sc2-rdkservices
+## from https://code.rdkcentral.com/r/plugins/gitiles/collaboration/soc/amlogic/aml-accel-manifests/+/refs/heads/rdk-next/rdk-firebolt-dunfell-ref-sc2-k54-202109.xml
+checkout_repo https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers meta-amlogic be293a67d35973fa6ca0e7cb20857db7098db3ea
+checkout_repo https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers meta-rdk-bsp-amlogic 5c16b76fab157709843d033c8cfbb96556ea30c6
+checkout_repo https://git.yoctoproject.org/git meta-security 93232ae6d52b0d1968aa0ce69fa745e85e3bbc6b
 
-## take newest sources for reference image
-checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference master
-checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference-next master
-
-## avoid removal of clearkey DISTRO feature
-sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove = "compositor"#' meta-rdk-bsp-amlogic/conf/machine/include/amlogic*.inc
+# Skyworth
+# tip of rdk-next on 19-10-2021
+checkout_repo "ssh://dev.caldero.com:29418" "meta-rdk-skyworth-hx4x" c33e765d26f8b554dac6bb76632b948b4c9be130
+# tip of sc2-rdkservices on 19-10-2021
+checkout_repo "https://code.rdkcentral.com/r/collaboration/oem/skyworth/yocto_oe/layers" "meta-rdk-oem-skyworth-aml905X2" 8344d8eb4a29dec8bed62d8116e63cea68521877
 
 cat <<EOF >> _build.sh
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable

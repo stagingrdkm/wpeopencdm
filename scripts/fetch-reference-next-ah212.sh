@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 TARGET_DIR_SUFFIX=""
- 
+
 ######### Build setup and repo sync
 rm -rf ah212_reference_next$TARGET_DIR_SUFFIX
 mkdir ah212_reference_next$TARGET_DIR_SUFFIX
@@ -16,15 +16,13 @@ checkout_repo() {
   cd -
 }
 
-repo init -u https://code.rdkcentral.com/r/collaboration/soc/amlogic/aml-accel-manifests -b rdk-next -m rdk-firebolt-dunfell-ref-sc2-k54.xml
+repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b dunfell -m rdkv-nosrc.xml
 repo sync --no-clone-bundle -j12
 
-## take newest sources for reference image
-checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference master
-checkout_repo https://code.rdkcentral.com/r/a/components/generic/rdk-oe meta-cmf-video-reference-next master
-
-## avoid removal of clearkey DISTRO feature
-sed -i 's#DISTRO_FEATURES_remove = " compositor clearkey"#DISTRO_FEATURES_remove = "compositor"#' meta-rdk-bsp-amlogic/conf/machine/include/amlogic*.inc
+## from https://code.rdkcentral.com/r/plugins/gitiles/collaboration/soc/amlogic/aml-accel-manifests/+/refs/heads/rdk-next/rdk-firebolt-dunfell-ref-sc2-k54-202109.xml
+checkout_repo https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers meta-amlogic be293a67d35973fa6ca0e7cb20857db7098db3ea
+checkout_repo https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers meta-rdk-bsp-amlogic 5c16b76fab157709843d033c8cfbb96556ea30c6
+checkout_repo https://git.yoctoproject.org/git meta-security 93232ae6d52b0d1968aa0ce69fa745e85e3bbc6b
 
 cat <<EOF >> _build.sh
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
