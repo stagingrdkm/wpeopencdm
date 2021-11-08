@@ -12,7 +12,7 @@ repo sync --no-clone-bundle -j12
 
 ## clone meta-rdk-soc-realtek but only shallow because connection sometimes very slow
 ## do regular clone if you want to inspect other branches and history
-git clone ssh://gitsrv.realtek.com:29418/git/DHC_SDK/cmf/rdk/yocto_oe/layers/meta-rdk-soc-realtek --branch release/common/rdkv-2021q1-dunfell --depth 1 --single-branch meta-rdk-soc-realtek
+git clone ssh://gitsrv.realtek.com:29418/git/DHC_SDK/cmf/rdk/yocto_oe/layers/meta-rdk-soc-realtek --branch release/common/rdk-next-dunfell --depth 1 --single-branch meta-rdk-soc-realtek
 
 cat <<EOF >> _build.sh
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
