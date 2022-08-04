@@ -58,7 +58,8 @@ download_list=(
     #  - to: is either dst directory or dst path name
 
     "$TGZS_DIR/refsw_release_unified_URSR_22.0.1_20220411.tgz#downloads/"
-    "$TGZS_DIR/stblinux-5.4-1.5.tar.bz2#downloads/"
+    "$TGZS_DIR/stblinux-5.4-1.7.tar.bz2#downloads/"
+    "$TGZS_DIR/SVPFW_DSP_22_0_11_BCM7216_B0_ZB_Automated_FW_Signing-4424_E1.tgz#downloads/"
     "$TGZS_DIR/refsw_release_unified_URSR_22.0.1_20220411_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_22.0.1_20220411_3pips_broadcom.tgz"
 )
 
@@ -73,7 +74,7 @@ cat <<EOF >> _build.sh
 ######### brcm972127ott build
 declare -x MACHINE="brcm972127ott-refboard"
 #declare -x RDK_URSR_VERSION="22.0.1"
-#declare -x RDK_KERNEL_VERSION="5.4-1.5"
+#declare -x RDK_KERNEL_VERSION="5.4-1.7"
 #declare -x REFSW_3PIP_MD5="51277f72e15757a2769e074c38a63886"
 #declare -x REFSW_3PIP_SHA256="692eceed06797fb8f6171ed87a726506462cd8e4f71b499cf7fe1b60683d6092"
 
