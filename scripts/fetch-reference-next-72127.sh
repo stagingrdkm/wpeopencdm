@@ -70,6 +70,14 @@ for i in ${download_list[@]}; do
     download_file "${from}" "${to}"
 done
 
+##### cherry picks
+# 72127ott build fixes
+(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/86/83486/1 && git cherry-pick FETCH_HEAD)
+# brcmexternalsrc.bbclass and ctrlm-main fix
+(cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/83/83483/1 && git cherry-pick FETCH_HEAD)
+# CBCS change
+(cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/49/82049/4 && git cherry-pick FETCH_HEAD)
+
 cat <<EOF >> _build.sh
 ######### brcm972127ott build
 declare -x MACHINE="brcm972127ott-refboard"
