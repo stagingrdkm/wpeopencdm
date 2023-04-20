@@ -113,16 +113,25 @@ EOF
 fi
 #####
 
-cat <<EOF >> _build.sh
+cat << 'EOF' > _build.sh
 ######### brcm972180hbc build
-declare -x MACHINE="brcm972180hbc-refboard"
-declare -x RDK_URSR_VERSION="23.0"
-declare -x REFSW_3PIP_MD5="fee02520329dd89f51b01a1da7cfdbe3"
-declare -x REFSW_3PIP_SHA256="a5f65eb968a092c15744bae62bd070d08c37c345512efa8c8a640e9ea29a7c1e"
+export MACHINE="brcm972180hbc-refboard"
+export RDK_URSR_VERSION="23.0"
+export REFSW_3PIP_MD5="fee02520329dd89f51b01a1da7cfdbe3"
+export REFSW_3PIP_SHA256="a5f65eb968a092c15744bae62bd070d08c37c345512efa8c8a640e9ea29a7c1e"
 
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
 
 . ./meta-cmf-video-reference-next/setup-environment
+
+cat << 'EOD' >> conf/local.conf
+
+MODE_64="aarch64"
+
+BB_NUMBER_THREADS = "${@oe.utils.cpu_count() * 3 // 2}"
+PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
+
+EOD
 
 EOF
 
