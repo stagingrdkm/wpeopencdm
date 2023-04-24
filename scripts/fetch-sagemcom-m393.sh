@@ -74,9 +74,6 @@ done
 # remove sagemcom bbappend about stblinux tarballs
 rm meta-rdk-sagemcom/meta-sagemcom-generic/recipes-kernel/stblinux/stblinux_5.4-1.7-generic-rdk.bbappend
 
-# remove sysint bbappend because patch does not apply (is now commented out in bbappend)
-#rm meta-rdk-sagemcom/meta-sagemcom-top-m393-72180ZB-stb/recipes-extended/sysint/sysint_git.bbappend
-
 # fix refsw tarball reference and checksums
 cat <<EOF >> meta-rdk-sagemcom/meta-sagemcom-generic/recipes-bsp/broadcom-refsw/broadcom-refsw_unified-22.0.1-generic-rdk.bbappend
 SRC_URI_remove = "https://\${RDK_ARTIFACTS_URL}/broadcom_restricted/22_0_1/refsw_release_unified_URSR_22_0_1_20220411_3pips_comcast/2.1/refsw_release_unified_URSR_22_0_1_20220411_3pips_comcast-2.1.tgz;name=3pip"
@@ -90,10 +87,6 @@ SRC_URI += "file://SVPFW_DSP_22_0_11_BCM7216_B0_ZB_Automated_FW_Signing-4424_E1.
 SRC_URI[ursr.md5sum] = "4738f2f3ee2f831cf87a015a774769b9"
 SRC_URI[ursr.sha256sum] = "d5e22d4d5250bc9672fb98691680cac321c5ca73f87e3d8ef1546d9875696498"
 EOF
-
-# fix small patch issue in bluez
-sed -i "s/STB_lowpowermode_5.45.patch'/STB_lowpowermode_5.45.patch;apply=no'/" meta-rdk-broadcom-generic-rdk/meta-brcm-refboard/meta-rdk-ext/recipes-connectivity/bluez5/bluez5_5.45.bbappend
-
 
 cat <<EOF >> _build.sh
 [ -f /opt/rh/devtoolset-7/enable ] && source /opt/rh/devtoolset-7/enable
