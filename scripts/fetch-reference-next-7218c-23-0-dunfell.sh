@@ -127,6 +127,8 @@ cat << 'EOD' >> conf/local.conf
 
 MODE_64="aarch64"
 
+DISTRO_FEATURES_append=" libglvnd-as-stubs-provider"
+
 BB_NUMBER_THREADS = "${@oe.utils.cpu_count() * 3 // 2}"
 PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
 
