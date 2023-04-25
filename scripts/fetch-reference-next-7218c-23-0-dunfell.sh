@@ -87,9 +87,6 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-# Fixes: ERROR: ctrlm-main-1.99-r0 do_copy_brcmexternalsrc: ### failed copy here...
-(cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/83/83483/2 && git cherry-pick FETCH_HEAD)
-
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
     (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
