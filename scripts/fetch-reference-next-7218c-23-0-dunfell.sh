@@ -89,6 +89,8 @@ done
 ##### cherry picks
 (cd openembedded-core && git fetch https://code.rdkcentral.com/r/rdk/components/opensource/oe/openembedded-core refs/changes/87/84187/1 && git cherry-pick FETCH_HEAD)
 
+(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/34/84234/1 && git cherry-pick FETCH_HEAD)
+
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
     (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
@@ -131,6 +133,11 @@ DISTRO_FEATURES_append=" libglvnd-as-stubs-provider"
 
 BB_NUMBER_THREADS = "${@oe.utils.cpu_count() * 3 // 2}"
 PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
+
+# Uncomment below lines to have debugging tools in the image
+#WHITELIST_GPL-3.0_append    = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver"
+#WHITELIST_LGPL-3.0_append   = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver"
+#IMAGE_INSTALL_append        = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver ${MLPREFIX}strace ${MLPREFIX}tcpdump ${MLPREFIX}rsync ${MLPREFIX}sudo"
 
 EOD
 
