@@ -87,10 +87,6 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
-(cd openembedded-core && git fetch https://code.rdkcentral.com/r/rdk/components/opensource/oe/openembedded-core refs/changes/87/84187/1 && git cherry-pick FETCH_HEAD)
-
-(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/34/84234/1 && git cherry-pick FETCH_HEAD)
-
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
     (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
