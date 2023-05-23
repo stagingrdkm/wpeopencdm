@@ -87,6 +87,9 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
+ # RDKCMF-8908 Fix lib32-lvm2 packaging error
+ (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/1 && git format-patch -1 --stdout FETCH_HEAD)
+
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
     (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
