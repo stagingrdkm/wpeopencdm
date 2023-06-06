@@ -59,6 +59,7 @@ download_list=(
     "$TGZS_DIR/refsw_release_unified_URSR_23_20221220.tgz#downloads/"
     "$TGZS_DIR/stblinux-5.4-1.10.tar.bz2#downloads/stblinux-5.4-1.10-2.1.tar.bz2"
     "$TGZS_DIR/refsw_release_unified_URSR_23_20221220_3pips_libertyglobal.tgz#downloads/refsw_release_unified_URSR_23_20221220_3pips_broadcom.tgz"
+    "$TGZS_DIR/svpfw_dsp_7218c.bin#downloads/svpfw_dsp.bin"
 )
 
 for i in ${download_list[@]}; do
@@ -88,8 +89,11 @@ SRC_URI += "https://\${RDK_ARTIFACTS_URL}/broadcom_restricted/23/refsw_release_u
 SRC_URI[3pip.md5sum] = "fee02520329dd89f51b01a1da7cfdbe3"
 SRC_URI[3pip.sha256sum] = "a5f65eb968a092c15744bae62bd070d08c37c345512efa8c8a640e9ea29a7c1e"
 
-# remove svpfw_dsp.bin
+# replace svpfw_dsp.bin
 SRC_URI_remove = "https://\${RDK_ARTIFACTS_URL}/Dev_Tools/components/23.0/svpfw_dsp.bin;name=firmware"
+SRC_URI += "https://127.0.0.1/svpfw_dsp.bin;name=firmware"
+SRC_URI[firmware.md5sum] = "27b34979560fd414c5834f6e92463200"
+SRC_URI[firmware.sha256sum] = "956986517f769f34b574c730fe527f8f3bf18a3bebea1fe437b2539b5300e7bf"
 
 # change the tarball checksums
 SRC_URI[ursr.md5sum] = "11531f20152569819d8642b8b78937cc"
@@ -97,11 +101,6 @@ SRC_URI[ursr.sha256sum] = "90db94c90359e157835f56375aedccf1c66410c0c7bce42de5bd3
 
 # remove comcast specific tarball
 SRC_URI_remove = "https://\${RDK_ARTIFACTS_URL}/broadcom_restricted/23/refsw_release_unified_URSR_23_20221220-dbv/2.1/refsw_release_unified_URSR_23_20221220-dbv.tgz;name=dbv"
-
-# fake svpfw_dsp.bin
-do_install_prepend() {
-    touch \${WORKDIR}/svpfw_dsp.bin
-}
 EOF
 
 cat << EOF >> meta-rdk-sagemcom/meta-sagemcom-generic/recipes-wpeframework-clientlibraries/wpeframework-clientlibraries/wpeframework-clientlibraries_git.bbappend
