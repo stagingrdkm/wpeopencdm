@@ -129,7 +129,10 @@ cat <<EOF >> _build.sh
 
 source ./build-m393-72180ZB-stb-sdk23.0-rdkcmf-dev/activate.sh
 
-echo 'BBLAYERS =+ "\${RDKROOT}/meta-rdk-cobalt"' >> conf/bblayers.conf
+if ! grep -q meta-rdk-cobalt conf/bblayers.conf; then
+  echo 'BBLAYERS =+ "\${RDKROOT}/meta-rdk-cobalt"' >> conf/bblayers.conf
+fi
+
 echo 'MODE_64="aarch64"' >> conf/local.conf
 #echo 'SDK_WITH_PLAYREADY="n"' >> conf/local.conf
 #echo 'SDK_WITH_WIDEVINE="n"' >> conf/local.conf
