@@ -133,10 +133,14 @@ DISTRO_FEATURES_append=" libglvnd-as-stubs-provider"
 BB_NUMBER_THREADS = "${@oe.utils.cpu_count() * 3 // 2}"
 PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
 
-# Uncomment below lines to have debugging tools in the image
+# Comment out below lines to have debugging tools in the image
 #WHITELIST_GPL-3.0_append    = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver"
 #WHITELIST_LGPL-3.0_append   = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver"
 #IMAGE_INSTALL_append        = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver ${MLPREFIX}strace ${MLPREFIX}tcpdump ${MLPREFIX}rsync ${MLPREFIX}sudo"
+
+# Comment out for enabling OMI in the image
+#IMAGE_INSTALL_append = " ${MLPREFIX}omi libkwk-rdk-data ${MLPREFIX}omi-test ${MLPREFIX}libmntfsimg-test ${MLPREFIX}libdacjwt-test"
+#PREFERRED_PROVIDER_virtual/${MLPREFIX}libkwk="libkwk-rdk"
 
 EOD
 
