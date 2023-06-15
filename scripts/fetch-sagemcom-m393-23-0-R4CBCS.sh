@@ -43,7 +43,7 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/27/86327/3 && git cherry-pick FETCH_HEAD)
 
 # fix
-(cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/65/86465/1 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/53/86653/4 && git cherry-pick FETCH_HEAD)
 
 #mkdir rdkmanifests
 #cp .repo/manifests/reference/auto.conf ./rdkmanifests/auto.conf
