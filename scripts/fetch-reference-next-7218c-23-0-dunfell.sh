@@ -100,7 +100,7 @@ done
  (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/1 && git cherry-pick FETCH_HEAD)
 
  # RDKDEV-774 DAC-sec (OMI) upstreaming (kernel config)
- (cd meta-rdk-broadcom-next && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/74/86774/1 && git cherry-pick FETCH_HEAD)
+ (cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/74/86774/1 && git cherry-pick FETCH_HEAD)
 
  # RDKDEV-774 DAC-sec libkwk-rdk-data (Don't merge)
  (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/76/86776/1 && git cherry-pick FETCH_HEAD)
@@ -158,7 +158,7 @@ PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
 #IMAGE_INSTALL_append = " ${MLPREFIX}omi libkwk-rdk-data ${MLPREFIX}omi-test ${MLPREFIX}libmntfsimg-test ${MLPREFIX}libdacjwt-test"
 #PREFERRED_PROVIDER_virtual/${MLPREFIX}libkwk="libkwk-rdk"
 
-DISTRO_FEATURES_remove="DOBBY_CONTAINERS"
+DISTRO_FEATURES_append=" DOBBY_CONTAINERS"
 DISTRO_FEATURES_append=" DAC-sec"
 IMAGE_INSTALL_append = " libkwk-rdk-data"
 
