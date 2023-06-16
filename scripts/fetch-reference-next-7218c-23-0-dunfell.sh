@@ -90,6 +90,22 @@ done
  # RDKCMF-8908 Fix lib32-lvm2 packaging error
  (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/1 && git cherry-pick FETCH_HEAD)
 
+ # RDKDEV-774 Import recipes (cjose, dropprivileges, omi)
+ (cd met-cmf && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-cmf refs/changes/54/86654/3 && git cherry-pick FETCH_HEAD)
+
+ # RDKDEV-774 Import recipes (libdacjwt, libkwk-rdk, libmntfsimg)
+ (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/55/86655/1 && git cherry-pick FETCH_HEAD)
+
+ # RDKDEV-774 DAC-sec omi-proxy for Thunder
+ (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/1 && git format-patch -1 --stdout FETCH_HEAD)
+
+ # RDKDEV-774 DAC-sec (OMI) upstreaming (kernel config)
+ (cd git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/74/86774/1 && git cherry-pick FETCH_HEAD)
+
+ # RDKDEV-774 DAC-sec libkwk-rdk-data (Don't merge)
+ (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/76/86776/1 && git cherry-pick FETCH_HEAD)
+
+
 if [ ! -z "$NETFLIX" ]; then
     # netflix integration commit
     (cd meta-cmf-video-reference-next && git fetch "https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next" refs/changes/93/49193/8 && git cherry-pick FETCH_HEAD)
@@ -141,6 +157,10 @@ PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
 # Comment out for enabling OMI in the image
 #IMAGE_INSTALL_append = " ${MLPREFIX}omi libkwk-rdk-data ${MLPREFIX}omi-test ${MLPREFIX}libmntfsimg-test ${MLPREFIX}libdacjwt-test"
 #PREFERRED_PROVIDER_virtual/${MLPREFIX}libkwk="libkwk-rdk"
+
+DISTRO_FEATURES_remove="DOBBY_CONTAINERS"
+DISTRO_FEATURES_append=" DAC-sec"
+IMAGE_INSTALL_append = " libkwk-rdk-data"
 
 EOD
 
