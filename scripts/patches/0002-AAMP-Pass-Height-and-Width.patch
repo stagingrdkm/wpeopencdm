@@ -1,0 +1,61 @@
+Index: git/drm/AampDrmSession.cpp
+===================================================================
+--- git.orig/drm/AampDrmSession.cpp
++++ git/drm/AampDrmSession.cpp
+@@ -52,7 +52,7 @@ string AampDrmSession::getKeySystem()
+ /**
+  * @brief Function to decrypt GStreamer stream  buffer.
+  */
+-int AampDrmSession::decrypt(GstBuffer* keyIDBuffer, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer, bool useSvp, GstCaps* caps)
++int AampDrmSession::decrypt(GstBuffer* keyIDBuffer, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer, bool useSvp, GstCaps* caps, uint32_t width, uint32_t height)
+ {
+ 	AAMPLOG_ERR("GST decrypt method not implemented");
+ 	return -1;
+Index: git/drm/AampDrmSession.h
+===================================================================
+--- git.orig/drm/AampDrmSession.h
++++ git/drm/AampDrmSession.h
+@@ -110,7 +110,7 @@ public:
+ 	 * @param caps : Caps of the media that is currently being decrypted
+ 	 * @retval Returns status of decrypt request.
+ 	 */
+-	virtual int decrypt(GstBuffer* keyIDBuffer, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer, bool useSvp, GstCaps* caps = NULL);
++	virtual int decrypt(GstBuffer* keyIDBuffer, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer, bool useSvp, GstCaps* caps = NULL,  uint32_t width = 0, uint32_t height = 0);
+ 
+ 	/**
+ 	 * @fn decrypt
+Index: git/drm/AampOcdmGstSessionAdapter.cpp
+===================================================================
+--- git.orig/drm/AampOcdmGstSessionAdapter.cpp
++++ git/drm/AampOcdmGstSessionAdapter.cpp
+@@ -270,7 +270,7 @@ void AAMPOCDMGSTSessionAdapter::ExtractS
+ /**
+  * @brief decrypt the data
+  */
+-int AAMPOCDMGSTSessionAdapter::decrypt(GstBuffer *keyIDBuffer, GstBuffer *ivBuffer, GstBuffer *buffer, unsigned subSampleCount, GstBuffer *subSamplesBuffer, bool useSvp, GstCaps* caps)
++int AAMPOCDMGSTSessionAdapter::decrypt(GstBuffer *keyIDBuffer, GstBuffer *ivBuffer, GstBuffer *buffer, unsigned subSampleCount, GstBuffer *subSamplesBuffer, bool useSvp, GstCaps* caps, uint32_t width, uint32_t height)
+ {
+ 	int retValue = -1;
+ 
+@@ -305,7 +305,7 @@ int AAMPOCDMGSTSessionAdapter::decrypt(G
+ 		else
+ #endif
+ 		{
+-			retValue = opencdm_gstreamer_session_decrypt_ex(m_pOpenCDMSession, buffer, subSamplesBuffer, subSampleCount, ivBuffer, keyIDBuffer, 0, NULL, 0, 0, 0, useSvp);
++			retValue = opencdm_gstreamer_session_decrypt_ex(m_pOpenCDMSession, buffer, subSamplesBuffer, subSampleCount, ivBuffer, keyIDBuffer, 0, NULL, 0, 0, 0, useSvp, width, height);
+ 		}			
+ 		end_decrypt_time = GetCurrentTimeStampInMSec();
+ 		if (retValue != 0)
+Index: git/drm/AampOcdmGstSessionAdapter.h
+===================================================================
+--- git.orig/drm/AampOcdmGstSessionAdapter.h
++++ git/drm/AampOcdmGstSessionAdapter.h
+@@ -37,7 +37,7 @@ public:
+ 	};
+ 	~AAMPOCDMGSTSessionAdapter() {};
+ 
+-	int decrypt(GstBuffer* keyIDBuffer, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer, bool useSvp, GstCaps* caps);
++	int decrypt(GstBuffer* keyIDBuffer, GstBuffer* ivBuffer, GstBuffer* buffer, unsigned subSampleCount, GstBuffer* subSamplesBuffer, bool useSvp, GstCaps* caps,  uint32_t width, uint32_t height);
+ 	int decrypt(const uint8_t *f_pbIV, uint32_t f_cbIV, const uint8_t *payloadData, uint32_t payloadDataSize, uint8_t **ppOpaqueData);
+ private:
+ #if defined(AMLOGIC)
