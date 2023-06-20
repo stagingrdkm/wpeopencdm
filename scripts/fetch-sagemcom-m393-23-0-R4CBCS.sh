@@ -42,8 +42,23 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 # meta-cmf-video renames
 (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/27/86327/3 && git cherry-pick FETCH_HEAD)
 
-# fix
-(cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/53/86653/4 && git cherry-pick FETCH_HEAD)
+# amazon changes
+#(cd meta-rdk-amazon && git fetch https://code.rdkcentral.com/r/apps/amazon/rdk-oe/meta-rdk-amazon refs/changes/97/86697/1 && git cherry-pick FETCH_HEAD)
+# R4 support
+(cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/98/86698/1 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/25/86425/1 && git cherry-pick FETCH_HEAD)
+
+# AMLogic
+#(cd meta-amlogic && git fetch https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers/meta-amlogic refs/changes/00/86700/1 && git cherry-pick FETCH_HEAD)
+#(cd imeta-rdk-bsp-amlogic && git fetch https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers/meta-rdk-bsp-amlogic refs/changes/01/86701/1 && git cherry-pick FETCH_HEAD)
+#(cd meta-rdk-aml && git fetch https://code.rdkcentral.com/r/collaboration/soc/amlogic/yocto_oe/layers/meta-rdk-aml refs/changes/99/86699/1 && git cherry-pick FETCH_HEAD)
+
+# RPi
+#(cd meta-cmf-raspberrypi && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-cmf-raspberrypi refs/changes/24/86424/1 && git cherry-pick FETCH_HEAD)
+
+# fixes
+(cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/53/86653/5 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/33/86733/1 && git cherry-pick FETCH_HEAD)
 
 #mkdir rdkmanifests
 #cp .repo/manifests/reference/auto.conf ./rdkmanifests/auto.conf
