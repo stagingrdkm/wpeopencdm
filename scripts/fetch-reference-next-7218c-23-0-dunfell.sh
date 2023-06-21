@@ -90,12 +90,6 @@ done
  # RDKCMF-8908 Fix lib32-lvm2 packaging error
  (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/1 && git cherry-pick FETCH_HEAD)
 
- # RDKDEV-774 Import recipes (cjose, dropprivileges, omi)
- (cd meta-cmf && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-cmf refs/changes/54/86654/3 && git cherry-pick FETCH_HEAD)
-
- # RDKDEV-774 Import recipes (libdacjwt, libkwk-rdk, libmntfsimg)
- (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/55/86655/1 && git cherry-pick FETCH_HEAD)
-
  # RDKDEV-774 DAC-sec omi-proxy for Thunder
  (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/1 && git cherry-pick FETCH_HEAD)
 
