@@ -93,8 +93,8 @@ done
  # RDKDEV-774 DAC-sec omi-proxy for Thunder
  (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/1 && git cherry-pick FETCH_HEAD)
 
- # RDKDEV-774 DAC-sec (OMI) upstreaming (kernel config)
- (cd meta-rdk-broadcom-generic-rdk && git fetch https://code.rdkcentral.com/r/collaboration/soc/broadcom/yocto_oe/layers/meta-rdk-broadcom-next refs/changes/74/86774/1 && git cherry-pick FETCH_HEAD)
+ #RDKDEV-774 Add kernel configuration for OMI service
+ (cd meta-cmf && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-cmf refs/changes/43/87343/1 && git cherry-pick FETCH_HEAD)
 
  # RDKDEV-774 DAC-sec libkwk-rdk-data (Don't merge)
  (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/76/86776/1 && git cherry-pick FETCH_HEAD)
