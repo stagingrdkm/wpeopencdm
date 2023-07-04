@@ -87,6 +87,9 @@ for i in ${download_list[@]}; do
 done
 
 ##### cherry picks
+ # RDKDEV-774 Enable DAC-sec distro feature in reference images
+ (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/65/87665/1 && git cherry-pick FETCH_HEAD)
+
  # RDKCMF-8908 Fix lib32-lvm2 packaging error
  (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/1 && git cherry-pick FETCH_HEAD)
 
@@ -152,8 +155,10 @@ PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
 #IMAGE_INSTALL_append = " ${MLPREFIX}omi libkwk-rdk-data ${MLPREFIX}omi-test ${MLPREFIX}libmntfsimg-test ${MLPREFIX}libdacjwt-test"
 #PREFERRED_PROVIDER_virtual/${MLPREFIX}libkwk="libkwk-rdk"
 
-DISTRO_FEATURES_append=" DOBBY_CONTAINERS"
-DISTRO_FEATURES_append=" DAC-sec"
+# Covered by https://code.rdkcentral.com/r/c/components/generic/rdk-oe/meta-cmf-video-reference/+/87665
+#DISTRO_FEATURES_append=" DOBBY_CONTAINERS"
+#DISTRO_FEATURES_append=" DAC-sec"
+
 IMAGE_INSTALL_append = " libkwk-rdk-data"
 
 EOD
