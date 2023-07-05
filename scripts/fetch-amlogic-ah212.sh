@@ -34,11 +34,17 @@ cat <<EOF >> _build.sh
 # source meta-rdk-aml/set-env.sh mesonsc2-5.4-lib32-ah212 --use-rdk-ui --enable-rdk-voice --playready --widevine --amazon-plugin --enable-fireboltcompliance --rdk-starboard --b12remote
 # we skip --enable-rdk-voice --playready --widevine --amazon-plugin 
 
+# build including playready/widevine
+#source meta-rdk-aml/set-env.sh mesonsc2-5.4-lib32-ah212 --use-rdk-ui --playready --widevine --enable-fireboltcompliance --rdk-starboard --b12remote
+
+# build without playready/widevine
 source meta-rdk-aml/set-env.sh mesonsc2-5.4-lib32-ah212 --use-rdk-ui --enable-fireboltcompliance --rdk-starboard --b12remote
 
 if ! grep -q meta-rdk-cobalt conf/bblayers.conf; then
   echo 'BBLAYERS =+ "\${RDKROOT}/meta-rdk-cobalt"' >> conf/bblayers.conf
 fi
+
+echo 'DISTRO_FEATURES_append = " rialto"' >> conf/local.conf
 
 echo "bitbake -k lib32-rdk-generic-mediaclient-image"
 EOF

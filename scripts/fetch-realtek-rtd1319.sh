@@ -40,6 +40,7 @@ if ! grep -q meta-rdk-cobalt conf/bblayers.conf; then
 fi
 
 echo 'DISTRO_FEATURES_remove="alexa-sdk-3.0"' >> conf/local.conf
+echo 'DISTRO_FEATURES_append = " rialto"' >> conf/local.conf
 
 echo "bitbake -k rdk-generic-mediaclient-westeros-wpe-image"
 EOF
