@@ -94,10 +94,10 @@ done
  (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/1 && git cherry-pick FETCH_HEAD)
 
  # RDKDEV-774 Add support for DAC-sec distro feature
- (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/5 && git cherry-pick FETCH_HEAD)
+ (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/6 && git cherry-pick FETCH_HEAD)
 
  # RDKDEV-774 Fix calling mContainerStoppedCb()
- (cd meta-cmf-video-reference-next && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next refs/changes/11/87611/3 && git cherry-pick FETCH_HEAD)
+ (cd meta-cmf-video-reference-next && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference-next refs/changes/11/87611/4 && git cherry-pick FETCH_HEAD)
 
  # RDKDEV-774 DAC-sec libkwk-rdk-data (Don't merge)
  (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/76/86776/2 && git cherry-pick FETCH_HEAD)
