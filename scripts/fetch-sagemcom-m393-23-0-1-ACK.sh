@@ -82,8 +82,8 @@ SRC_URI[3pip.sha256sum] = "86e5ed4c766d222f8120f4a9dd327d0fee9beefd1a5889876be42
 # replace svpfw_dsp.bin
 SRC_URI_remove = "https://\${RDK_ARTIFACTS_URL}/Dev_Tools/components/23.0.1/svpfw_dsp.bin;name=firmware"
 SRC_URI += "https://127.0.0.1/svpfw_dsp.bin;name=firmware"
-SRC_URI[firmware.md5sum] = "27b34979560fd414c5834f6e92463200"
-SRC_URI[firmware.sha256sum] = "956986517f769f34b574c730fe527f8f3bf18a3bebea1fe437b2539b5300e7bf"
+SRC_URI[firmware.md5sum] = "4cebefa3da9e8ae51f91638c9dab68e1"
+SRC_URI[firmware.sha256sum] = "53fcf5be5a2a525036321523f78f9d1b5bc03735d114d63c145110f103d0b225"
 
 # change the tarball checksums
 SRC_URI[ursr.md5sum] = "ae3f8ef3360070d129d2a024aba3e2d5"
