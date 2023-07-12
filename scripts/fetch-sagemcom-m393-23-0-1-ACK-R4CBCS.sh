@@ -27,7 +27,7 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 # CBCS changes
 # jump to latest R2?
-(cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/70/85770/2 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/70/85770/4 && git cherry-pick FETCH_HEAD)
 # gst svp ext changes
 #git fetch https://code.rdkcentral.com/r/rdk/components/generic/gst_svp_ext refs/changes/67/85767/2 && git cherry-pick FETCH_HEAD
 # gstreamer change for cbcs
@@ -37,11 +37,11 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 # remove wpeframework patch
 (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/88/86288/2 && git cherry-pick FETCH_HEAD)
 # add 2 webkitbrowser patches
-(cd meta-rdk && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk refs/changes/87/86287/1 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk refs/changes/87/86287/2 && git cherry-pick FETCH_HEAD)
 # HUGE cleanup and R4 support
-(cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/17/86317/2 && git cherry-pick FETCH_HEAD)
+(cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/17/86317/4 && git cherry-pick FETCH_HEAD)
 # meta-cmf-video renames
-(cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/27/86327/3 && git cherry-pick FETCH_HEAD)
+(cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/27/86327/4 && git cherry-pick FETCH_HEAD)
 
 # amazon changes
 #(cd meta-rdk-amazon && git fetch https://code.rdkcentral.com/r/apps/amazon/rdk-oe/meta-rdk-amazon refs/changes/97/86697/1 && git cherry-pick FETCH_HEAD)
@@ -119,8 +119,8 @@ SRC_URI[3pip.sha256sum] = "86e5ed4c766d222f8120f4a9dd327d0fee9beefd1a5889876be42
 # replace svpfw_dsp.bin
 SRC_URI_remove = "https://\${RDK_ARTIFACTS_URL}/Dev_Tools/components/23.0.1/svpfw_dsp.bin;name=firmware"
 SRC_URI += "https://127.0.0.1/svpfw_dsp.bin;name=firmware"
-SRC_URI[firmware.md5sum] = "27b34979560fd414c5834f6e92463200"
-SRC_URI[firmware.sha256sum] = "956986517f769f34b574c730fe527f8f3bf18a3bebea1fe437b2539b5300e7bf"
+SRC_URI[firmware.md5sum] = "4cebefa3da9e8ae51f91638c9dab68e1"
+SRC_URI[firmware.sha256sum] = "53fcf5be5a2a525036321523f78f9d1b5bc03735d114d63c145110f103d0b225"
 
 # change the tarball checksums
 SRC_URI[ursr.md5sum] = "ae3f8ef3360070d129d2a024aba3e2d5"
