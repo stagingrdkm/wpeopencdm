@@ -24,6 +24,8 @@ fi
 repo init -u https://code.rdkcentral.com/r/rdk/yocto_oe/manifests/bcm-accel-manifests -b dunfell -m rdkv-broadcom-va.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
+(cd meta-rdk-cobalt && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-cobalt refs/changes/88/88188/1 && git cherry-pick FETCH_HEAD)
+
 function download_file() {
     local from="$1"
     local to="$2"
