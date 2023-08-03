@@ -26,9 +26,6 @@ repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 # add support for m393 builds
 (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/31/88931/1 && git cherry-pick FETCH_HEAD)
 
-# fix for cobalt 64bit runtime
-(cd meta-rdk-cobalt && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-cobalt refs/changes/88/88188/1 && git cherry-pick FETCH_HEAD)
-
 function download_file() {
     local from="$1"
     local to="$2"
