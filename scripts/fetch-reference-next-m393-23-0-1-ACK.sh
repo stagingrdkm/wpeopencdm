@@ -23,8 +23,6 @@ fi
 
 repo init -u https://code.rdkcentral.com/r/rdk/yocto_oe/manifests/bcm-accel-manifests -b dunfell -m rdkv-broadcom-va.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
-# add support for m393 builds
-(cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/31/88931/1 && git cherry-pick FETCH_HEAD)
 
 function download_file() {
     local from="$1"
