@@ -66,6 +66,28 @@ done
 
 #####
 
+function apply_patches() {
+    # Patches for DAC-sec functionality
+
+    # RDKDEV-774 Enable DAC-sec distro feature in reference images
+    (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/65/87665/2 && git cherry-pick FETCH_HEAD)
+
+    # RDKDEV-774 Add support for DAC-sec distro feature
+    (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/12 && git cherry-pick FETCH_HEAD)
+
+    # RDKDEV-774 DAC-sec libkwk-rdk-data
+    (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/66/90266/1 && git cherry-pick FETCH_HEAD)
+
+    # RDKDEV-774 Fix calling mContainerStoppedCb()
+    (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/65/90265/1 && git cherry-pick FETCH_HEAD)
+
+    # RDKCMF-8908 Fix lib32-lvm2 packaging error
+    (cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/1 && git cherry-pick FETCH_HEAD)
+}
+
+# Uncomment to enable patches for DAC-sec
+#apply_patches
+
 cat << 'EOF' > _build.sh
 ######### brcm972180hbc build
 export MACHINE="brcm972180hbc-refboard"
