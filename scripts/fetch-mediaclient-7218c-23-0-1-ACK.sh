@@ -70,13 +70,16 @@ function apply_patches() {
     # Patches for DAC-sec functionality
 
     # RDKDEV-774 Enable DAC-sec distro feature in reference images
-    (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/65/87665/2 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/32/90332/2 && git cherry-pick FETCH_HEAD)
 
     # RDKDEV-774 Add support for DAC-sec distro feature
     (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/12 && git cherry-pick FETCH_HEAD)
 
     # RDKDEV-774 DAC-sec libkwk-rdk-data
-    (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/66/90266/1 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/66/90266/3 && git cherry-pick FETCH_HEAD)
+
+    # RDKDEV-774 Add runtime dependency for libkwk-data
+    (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/30/90330/1 && git cherry-pick FETCH_HEAD)
 
     # RDKDEV-774 Fix calling mContainerStoppedCb()
     (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/65/90265/1 && git cherry-pick FETCH_HEAD)
