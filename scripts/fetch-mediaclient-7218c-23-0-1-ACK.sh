@@ -88,7 +88,7 @@ function apply_patches() {
     #(cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/2 && git cherry-pick FETCH_HEAD)
 
     # RDKCMF-8908 Fix lib32-lvm2 packaging error (stopgap)
-    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/07/90907/1 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/07/90907/2 && git cherry-pick FETCH_HEAD)
 }
 
 # Uncomment to enable patches for DAC-sec
