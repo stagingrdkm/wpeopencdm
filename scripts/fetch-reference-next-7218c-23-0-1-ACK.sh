@@ -69,7 +69,7 @@ function apply_patches() {
     # Patches for DAC-sec functionality
 
     # RDKDEV-774 Enable DAC-sec distro feature in reference images
-    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/32/90332/8 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/32/90332/9 && git cherry-pick FETCH_HEAD)
 
     # RDKDEV-774 Add support for DAC-sec distro feature
     (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/14 && git cherry-pick FETCH_HEAD)
