@@ -69,7 +69,7 @@ function apply_patches() {
     # Patches for DAC-sec functionality
 
     # RDKDEV-774 Enable DAC-sec distro feature in reference images
-    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/32/90332/7 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf-video && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video refs/changes/32/90332/8 && git cherry-pick FETCH_HEAD)
 
     # RDKDEV-774 Add support for DAC-sec distro feature
     (cd meta-rdk-video && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-video refs/changes/75/86775/14 && git cherry-pick FETCH_HEAD)
@@ -81,7 +81,7 @@ function apply_patches() {
     (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/30/90330/2 && git cherry-pick FETCH_HEAD)
 
     # RDKDEV-774 Fix calling mContainerStoppedCb()
-    (cd meta-cmf-video-reference && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-reference refs/changes/65/90265/1 && git cherry-pick FETCH_HEAD)
+    (cd meta-cmf && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-cmf refs/changes/14/91014/1 && git cherry-pick FETCH_HEAD)
 
     # RDKCMF-8908 Fix lib32-lvm2 packaging error
     #(cd meta-rdk-ext && git fetch https://code.rdkcentral.com/r/rdk/components/generic/rdk-oe/meta-rdk-ext refs/changes/10/85410/2 && git cherry-pick FETCH_HEAD)
