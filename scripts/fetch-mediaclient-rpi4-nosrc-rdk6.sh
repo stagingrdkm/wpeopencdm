@@ -2,11 +2,11 @@
 set -e
 
 ######### Build setup and repo sync
-rm -rf rpi4_mediaclient_nosrc_dunfell
-mkdir rpi4_mediaclient_nosrc_dunfell
-cd rpi4_mediaclient_nosrc_dunfell
+rm -rf rpi4_mediaclient_nosrc_rdk6
+mkdir rpi4_mediaclient_nosrc_rdk6
+cd rpi4_mediaclient_nosrc_rdk6
 
-repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b dunfell -m rdkv-nosrc.xml
+repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b 6.0.0-rc3 -m rdkv-nosrc.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 cat <<EOF >> _build.sh
@@ -14,5 +14,5 @@ cat <<EOF >> _build.sh
 MACHINE=raspberrypi4-64-rdk-android-mc source meta-cmf-raspberrypi/setup-environment
 EOF
 
-echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd rpi4_mediaclient_nosrc_dunfell; source _build.sh"
+echo "RUN FOLLOWING TO PREPARE FOR BUILD: cd rpi4_mediaclient_nosrc_rdk6; source _build.sh"
 echo "BUILD: bitbake lib32-rdk-generic-mediaclient-image"
