@@ -6,7 +6,7 @@ rm -rf rpi3_mediaclient_nosrc_rdk6
 mkdir rpi3_mediaclient_nosrc_rdk6
 cd rpi3_mediaclient_nosrc_rdk6
 
-repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b 6.0.0-rc3 -m rdkv-nosrc.xml
+repo init --no-clone-bundle -u https://code.rdkcentral.com/r/manifests -b rdk6-main -m rdkv-nosrc.xml
 repo sync --no-clone-bundle -j$(getconf _NPROCESSORS_ONLN)
 
 cat <<EOF >> _build.sh
