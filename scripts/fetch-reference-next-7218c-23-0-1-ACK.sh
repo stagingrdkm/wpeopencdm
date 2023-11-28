@@ -69,7 +69,25 @@ function apply_patches() {
     # Patches for DAC-sec functionality
 
     # RDKDEV-774 Add runtime dependency for libkwk-data
-    (cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/30/90330/2 && git cherry-pick FETCH_HEAD)
+    #(cd meta-cmf-restricted && git fetch https://code.rdkcentral.com/r/components/restricted/rdk-oe/meta-cmf-restricted refs/changes/30/90330/2 && git cherry-pick FETCH_HEAD)
+
+    # 94463: RDKCMF-8285 Update sessionmgr sources (14c8af7d5) | https://code.rdkcentral.com/r/c/components/generic/sessionmgr/+/94463
+    (cd components/generic/sessionmgr && git fetch https://code.rdkcentral.com/r/components/generic/sessionmgr refs/changes/63/94463/1 && git cherry-pick FETCH_HEAD)
+
+    # 92323: RDKCMF-8285 Update gstreamer-cxx sources (14c8af7d5) | https://code.rdkcentral.com/r/c/components/generic/gstreamer-cxx/+/92323
+    (cd components/generic/gstreamer-cxx && git fetch https://code.rdkcentral.com/r/components/generic/gstreamer-cxx refs/changes/23/92323/3 && git cherry-pick FETCH_HEAD)
+
+    # 92247: RDKCMF-8285 Update websocket-ipplayer2-utils sources (14c8af7d5) | https://code.rdkcentral.com/r/c/components/generic/websocket-ipplayer2-utils/+/92247
+    (cd components/generic/websocket-ipplayer2-utils && git fetch https://code.rdkcentral.com/r/components/generic/websocket-ipplayer2-utils refs/changes/47/92247/6 && git cherry-pick FETCH_HEAD)
+
+    # 94371: RDKCMF-8285 Update websocket-ipplayer2 recipes (14c8af7d5) | https://code.rdkcentral.com/r/c/components/generic/rdk-oe/meta-cmf-video-restricted/+/94371
+    (cd meta-cmf-video-restricted && git fetch https://code.rdkcentral.com/r/components/generic/rdk-oe/meta-cmf-video-restricted refs/changes/71/94371/3 && git cherry-pick FETCH_HEAD)
+
+    # 94236: RDKCMF-8285 Update websocket-ipplayer2 sources (14c8af7d5) | https://code.rdkcentral.com/r/c/components/generic/websocket-ipplayer2/+/94236
+    (cd components/generic/websocket-ipplayer2 && git fetch https://code.rdkcentral.com/r/components/generic/websocket-ipplayer2 refs/changes/36/94236/9 && git cherry-pick FETCH_HEAD)
+
+    # 92297: RDKCMF-8285 Update websocket-ipplayer2-api sources (14c8af7d5) | https://code.rdkcentral.com/r/c/components/generic/websocket-ipplayer2-api/+/92297
+    (cd components/generic/websocket-ipplayer2-api && git fetch https://code.rdkcentral.com/r/components/generic/websocket-ipplayer2-api refs/changes/97/92297/6 && git cherry-pick FETCH_HEAD)
 }
 
 # Uncomment to enable patches for DAC-sec
@@ -107,6 +125,23 @@ PARALLEL_MAKE = "-j ${@oe.utils.cpu_count() * 3 // 2}"
 #WHITELIST_GPL-3.0_append    = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver"
 #WHITELIST_LGPL-3.0_append   = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver"
 #IMAGE_INSTALL_append        = " ${MLPREFIX}gdb ${MLPREFIX}gdbserver ${MLPREFIX}strace ${MLPREFIX}tcpdump ${MLPREFIX}rsync ${MLPREFIX}sudo"
+
+#INHERIT += "externalsrc"
+
+#EXTERNALSRC_pn-websocket-ipplayer-client = "${@'${RDKROOT}/components/generic/websocket-ipplayer2'       if (os.path.isdir('${RDKROOT}/components/generic/websocket-ipplayer2'))       else ''}"
+
+#EXTERNALSRC_pn-websocket-ipplayer2       = "${@'${RDKROOT}/components/generic/websocket-ipplayer2'       if (os.path.isdir('${RDKROOT}/components/generic/websocket-ipplayer2'))       else ''}"
+#EXTERNALSRC_pn-websocket-ipplayer2-api   = "${@'${RDKROOT}/components/generic/websocket-ipplayer2-api'   if (os.path.isdir('${RDKROOT}/components/generic/websocket-ipplayer2-api'))   else ''}"
+#EXTERNALSRC_pn-websocket-ipplayer2-utils = "${@'${RDKROOT}/components/generic/websocket-ipplayer2-utils' if (os.path.isdir('${RDKROOT}/components/generic/websocket-ipplayer2-utils')) else ''}"
+
+#EXTERNALSRC_pn-sessionmgr                = "${@'${RDKROOT}/components/generic/sessionmgr'                if (os.path.isdir('${RDKROOT}/components/generic/sessionmgr'))                else ''}"
+
+##EXTERNALSRC_pn-mabr-agent                = "${@'${RDKROOT}/components/generic/onemw-src'                 if (os.path.isdir('${RDKROOT}/components/generic/onemw-src'))                 else ''}"
+##EXTERNALSRC_pn-mabr-agent-api            = "${@'${RDKROOT}/components/generic/onemw-src'                 if (os.path.isdir('${RDKROOT}/components/generic/onemw-src'))                 else ''}"
+
+#IMAGE_INSTALL_append = " ${MLPREFIX}mabr-agent"
+
+#IMAGE_INSTALL_append = " ${MLPREFIX}netsrvmgr"
 
 EOD
 
